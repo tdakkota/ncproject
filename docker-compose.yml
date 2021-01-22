@@ -1,0 +1,23 @@
+version: "3"
+
+volumes:
+  postgtes_volume:
+
+services:
+  database:
+    image: "postgres:latest"
+    container_name: "postgres"
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=ncapp
+      - POSTGRES_USER=ncapp
+      - POSTGRES_DB=hibernate_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgtes_volume:/var/lib/postgresql/data
+
+  ncapp:
+    build:
+      context: ./
+      dockerfile: ./src/main/docker

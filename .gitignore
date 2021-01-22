@@ -37,3 +37,8 @@ nb-configuration.xml
 
 # Local environment
 .env
+
+# Maven wrapper
+mvnw
+mvnw.cmd
+.mvn
