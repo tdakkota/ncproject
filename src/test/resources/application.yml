@@ -1,7 +1,7 @@
 quarkus:
   datasource:
     db-kind: postgresql
-    usenrame: ncapp
+    username: ncapp
     password: ncapp
     jdbc:
       url: jdbc:postgresql://localhost:5432/test_db
