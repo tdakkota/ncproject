@@ -8,6 +8,7 @@ import io.quarkus.security.jpa.Roles;
 import io.quarkus.security.jpa.UserDefinition;
 import io.quarkus.security.jpa.Username;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
@@ -17,6 +18,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 
@@ -24,35 +26,37 @@ import java.util.Set;
 @RegisterForReflection
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Table(name = "users")
 @UserDefinition
 public class User extends PanacheEntity {
     @Username
     @NotBlank(message = "Username may not be blank")
     @Length(max = 20)
-    public String username = "";
+    public String username;
 
     @Password
-    public String password = "";
+    @NotBlank(message = "Password may not be blank")
+    private String password;
 
-    @Roles
-    public String role;
-
+    @NotBlank(message = "Name may not be blank")
     @Pattern(regexp = "^[a-zA-Z][\\sa-zA-Z]*$")
     @Length(max = 50)
-    public String name = "";
+    public String name;
+
+    @Roles
+    public String role = "user";
 
     public Date createdAt = new Date();
 
-    @OneToMany(mappedBy = "assignee", cascade = CascadeType.ALL, orphanRemoval = true)
-    public Set<Incident> assignedIncidents;
+    @OneToMany(mappedBy = "assignee", cascade = CascadeType.ALL)
+    public Set<Incident> assignedIncidents = Collections.emptySet();
 
-    public static User signUp(String username, String password, String role) {
-        User user = new User();
-        user.username = username;
-        user.password = BcryptUtil.bcryptHash(password);
-        user.role = role;
-        user.persist();
-        return user;
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = BcryptUtil.bcryptHash(password);
     }
 }

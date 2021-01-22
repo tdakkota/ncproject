@@ -3,6 +3,7 @@ package org.tdakkota.ncproject.entities;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import org.tdakkota.ncproject.constraints.TimelineValid;
@@ -10,6 +11,7 @@ import org.tdakkota.ncproject.constraints.TimelineValid;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.Date;
 
@@ -17,6 +19,7 @@ import java.util.Date;
 @RegisterForReflection
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Table(name = "incidents")
 public class Incident extends PanacheEntity {
     public String icon;
@@ -29,6 +32,7 @@ public class Incident extends PanacheEntity {
     public Area area;
     @Embedded
     @TimelineValid
+    @NotNull
     public Timeline timeline;
     @Length(max = 100)
     public String description;
@@ -59,6 +63,7 @@ public class Incident extends PanacheEntity {
     }
 
     @Embeddable
+    @EqualsAndHashCode(callSuper = false)
     public static class Timeline {
         @NotEmpty
         public Date start;

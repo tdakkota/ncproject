@@ -2,11 +2,13 @@ package org.tdakkota.ncproject.entities;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @RegisterForReflection
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class IncidentEvent {
     public EventType type;
     public long id;

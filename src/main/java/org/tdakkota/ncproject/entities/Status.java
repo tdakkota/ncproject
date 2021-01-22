@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import org.tdakkota.ncproject.constraints.NotRecursive;
@@ -20,6 +21,7 @@ import java.util.List;
 @RegisterForReflection
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 @Table(name = "statuses")
 @NotRecursive
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,
