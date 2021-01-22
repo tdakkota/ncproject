@@ -6,21 +6,15 @@ import org.tdakkota.ncproject.entities.User;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Path("/user")
 public class UserResource {
-    @Transactional
-    @POST
-    @Path("signup")
-    public void signUp(@FormParam("username") String username, @FormParam("password") String password) {
-        User.signUp(username, password, "user");
-    }
-
     @GET
     @Path("{id}")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     public User get(@PathParam("id") Long id) {
         User status = User.findById(id);
         if (status == null) {
@@ -30,7 +24,7 @@ public class UserResource {
     }
 
     @GET
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     public List<User> list(@QueryParam("page") @DefaultValue("0") int pageIndex,
                            @QueryParam("size") @DefaultValue("20") int pageSize) {
         Page page = Page.of(pageIndex, pageSize);
@@ -38,8 +32,9 @@ public class UserResource {
     }
 
     @POST
-    @Consumes("application/json")
-    @Produces("application/json")
+    @Path("signup")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response add(@Valid User e) {
         e.persist();
         return Response.ok(e).build();
@@ -48,8 +43,8 @@ public class UserResource {
     @Transactional
     @PUT
     @Path("{id}")
-    @Consumes("application/json")
-    @Produces("application/json")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response update(@PathParam("id") Long id, @Valid User e) {
         User exist = User.findById(id);
         if (exist == null) {

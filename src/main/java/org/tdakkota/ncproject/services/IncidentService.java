@@ -1,5 +1,7 @@
 package org.tdakkota.ncproject.services;
 
+import io.quarkus.panache.common.Page;
+import io.quarkus.panache.common.Sort;
 import org.jboss.logging.Logger;
 import org.tdakkota.ncproject.entities.Incident;
 
@@ -8,6 +10,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.ws.rs.WebApplicationException;
+import java.util.List;
 
 @ApplicationScoped
 public class IncidentService {
@@ -23,6 +26,34 @@ public class IncidentService {
             throw new WebApplicationException(404);
         }
         return incident;
+    }
+
+    public List<Incident> list(Page page) {
+        return Incident.findAll().page(page).list();
+    }
+
+    private Sort defaultSort() {
+        return Sort.descending("priority", "start");
+    }
+
+    public List<Incident> getIncidentsByUser(Long id, Page page) {
+        return getIncidentsByUser(id, page, defaultSort());
+    }
+
+    public List<Incident> getIncidentsByUser(Long id, Page page, Sort sort) {
+        return Incident.find("from Incident as i where i.assignee.id = ?1", sort, id).
+                page(page).
+                list();
+    }
+
+    public List<Incident> getIncidentsByArea(Long id, Page page) {
+        return getIncidentsByArea(id, page, defaultSort());
+    }
+
+    public List<Incident> getIncidentsByArea(Long id, Page page, Sort sort) {
+        return Incident.find("from Incident as i where i.area.id = ?1", sort, id).
+                page(page).
+                list();
     }
 
     @Transactional
@@ -41,6 +72,7 @@ public class IncidentService {
         Incident exist = Incident.findById(incidentToSave.id);
         if (exist == null) {
             incidentToSave.persist();
+            this.emitter.opened(incidentToSave);
             return incidentToSave;
         }
 

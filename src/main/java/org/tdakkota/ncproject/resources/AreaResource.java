@@ -6,6 +6,7 @@ import org.tdakkota.ncproject.entities.Area;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
 public class AreaResource {
     @GET
     @Path("{id}")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     public Area get(@PathParam("id") Long id) {
         Area status = Area.findById(id);
         if (status == null) {
@@ -23,7 +24,7 @@ public class AreaResource {
     }
 
     @GET
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     public List<Area> list(@QueryParam("page") @DefaultValue("0") int pageIndex,
                            @QueryParam("size") @DefaultValue("20") int pageSize) {
         Page page = Page.of(pageIndex, pageSize);
@@ -32,8 +33,8 @@ public class AreaResource {
 
     @Transactional
     @POST
-    @Consumes("application/json")
-    @Produces("application/json")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response add(@Valid Area e) {
         e.persist();
         return Response.ok(e).build();
@@ -42,8 +43,8 @@ public class AreaResource {
     @Transactional
     @PUT
     @Path("{id}")
-    @Consumes("application/json")
-    @Produces("application/json")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response update(@PathParam("id") Long id, @Valid Area e) {
         Area exist = Area.findById(id);
         if (exist == null) {
