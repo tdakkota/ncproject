@@ -10,6 +10,15 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: "postgres:latest"
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: ncapp
+          POSTGRES_USER: ncapp
+          POSTGRES_DB: test_db
 
     steps:
       - uses: actions/checkout@v2
@@ -31,13 +40,4 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Run Maven test workflow
-        services:
-          postgres:
-            image: "postgres:latest"
-            ports:
-              - 5432:5432
-            env:
-              POSTGRES_PASSWORD: ncapp
-              POSTGRES_USER: ncapp
-              POSTGRES_DB: hibernate_db
         run: mvn test
