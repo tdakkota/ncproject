@@ -1,11 +1,11 @@
 package org.tdakkota.ncproject.constraints;
 
-import org.tdakkota.ncproject.entities.Status;
+import org.tdakkota.ncproject.entities.Incident;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class NotRecursiveConstraintValidator implements ConstraintValidator<NotRecursive, Status> {
+public class TimelineValidConstraintValidator implements ConstraintValidator<TimelineValid, Incident.Timeline> {
     /**
      * Implements the validation logic.
      * The state of {@code value} must not be altered.
@@ -18,11 +18,10 @@ public class NotRecursiveConstraintValidator implements ConstraintValidator<NotR
      * @return {@code false} if {@code value} does not pass the constraint
      */
     @Override
-    public boolean isValid(Status value, ConstraintValidatorContext context) {
-        if (value.successors == null || value.successors.isEmpty()) {
-            return true;
-        }
-        // Check that successors does not contain parent Status.
-        return value.successors.stream().noneMatch(sub -> sub.id.equals(value.id));
+    public boolean isValid(Incident.Timeline value, ConstraintValidatorContext context) {
+        return value != null &&
+                value.start != null &&
+                value.due != null &&
+                value.start.before(value.due);
     }
 }

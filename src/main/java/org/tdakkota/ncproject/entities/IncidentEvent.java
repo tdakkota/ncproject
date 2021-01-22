@@ -1,17 +1,15 @@
 package org.tdakkota.ncproject.entities;
 
-public class IncidentEvent {
-    public enum EventType {
-        OPENED, UPDATED, CLOSED
-    }
+import io.quarkus.runtime.annotations.RegisterForReflection;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
+@RegisterForReflection
+@NoArgsConstructor
+@AllArgsConstructor
+public class IncidentEvent {
     public EventType type;
     public long id;
-
-    public IncidentEvent(EventType type, long id) {
-        this.type = type;
-        this.id = id;
-    }
 
     public static IncidentEvent opened(Incident i) {
         return new IncidentEvent(EventType.OPENED, i.id);
@@ -23,5 +21,9 @@ public class IncidentEvent {
 
     public static IncidentEvent closed(Incident i) {
         return new IncidentEvent(EventType.CLOSED, i.id);
+    }
+
+    public enum EventType {
+        OPENED, UPDATED, CLOSED
     }
 }

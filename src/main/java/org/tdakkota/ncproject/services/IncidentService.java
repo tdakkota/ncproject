@@ -1,42 +1,21 @@
 package org.tdakkota.ncproject.services;
 
-import org.eclipse.microprofile.reactive.messaging.Channel;
-import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.jboss.logging.Logger;
 import org.tdakkota.ncproject.entities.Incident;
-import org.tdakkota.ncproject.entities.IncidentEvent;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import javax.ws.rs.WebApplicationException;
 
 @ApplicationScoped
 public class IncidentService {
     @Inject
-    Logger log;
+    IncidentEventEmitter emitter;
 
     @Inject
-    @Channel("incidents")
-    Emitter<IncidentEvent> incidentUpdates;
-
-    private void sendAndAwait(IncidentEvent e) {
-        incidentUpdates.send(e).
-                toCompletableFuture().
-                join();
-    }
-
-    private void opened(Incident incidentToSave) {
-        this.sendAndAwait(IncidentEvent.opened(incidentToSave));
-    }
-
-    private void updated(Incident incidentToSave) {
-        this.sendAndAwait(IncidentEvent.updated(incidentToSave));
-    }
-
-    private void closed(Incident incidentToSave) {
-        this.sendAndAwait(IncidentEvent.closed(incidentToSave));
-    }
+    Logger log;
 
     public Incident get(Long id) {
         Incident incident = Incident.findById(id);
@@ -47,20 +26,30 @@ public class IncidentService {
     }
 
     @Transactional
-    public Incident add(Incident incidentToSave) {
+    public Incident add(@Valid Incident incidentToSave) {
         incidentToSave.persist();
 
         this.log.debug("Incident created:" + incidentToSave.toString());
-        this.opened(incidentToSave);
+        this.emitter.opened(incidentToSave);
         return incidentToSave;
     }
 
     @Transactional
-    public Incident update(Incident incidentToSave) {
+    public Incident update(@Valid Incident incidentToSave) {
         incidentToSave.persist();
 
-        this.updated(incidentToSave);
-        return incidentToSave;
+        Incident exist = Incident.findById(incidentToSave.id);
+        if (exist == null) {
+            incidentToSave.persist();
+            return incidentToSave;
+        }
+
+        Incident result = exist.getEntityManager().merge(incidentToSave);
+        result.persist();
+
+        this.log.debug("Incident updated:" + result.toString());
+        this.emitter.updated(result);
+        return result;
     }
 
     @Transactional
@@ -72,6 +61,7 @@ public class IncidentService {
         incident.closed = true;
         incident.persist();
 
-        this.closed(incident);
+        this.log.debug("Incident closed:" + incident.toString());
+        this.emitter.closed(incident);
     }
 }

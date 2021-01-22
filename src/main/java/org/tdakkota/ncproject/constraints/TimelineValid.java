@@ -7,11 +7,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+@Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = NotRecursiveConstraintValidator.class)
-public @interface NotRecursive {
-    String message() default "must not be self-referential";
+@Constraint(validatedBy = TimelineValidConstraintValidator.class)
+public @interface TimelineValid {
+    String message() default "timeline is invalid";
 
     Class<?>[] groups() default {};
 
