@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import org.tdakkota.ncproject.constraints.NotRecursive;
@@ -16,12 +15,13 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Entity
 @RegisterForReflection
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
 @Table(name = "statuses")
 @NotRecursive
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,
@@ -35,4 +35,39 @@ public class Status extends PanacheEntity {
 
     @OneToMany(mappedBy = "id")
     public List<Status> successors = new ArrayList<>();
+
+    public Status update(Status e) {
+        this.name = e.name;
+        this.description = e.description;
+        this.successors = new ArrayList<>(e.successors);
+        this.persist();
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        String successors = this.successors.stream().
+                filter(a -> a != this)
+                .map(Object::toString)
+                .collect(Collectors.joining(","));
+        return "Status{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", successors=[" + successors + "], id=" + id +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Status)) return false;
+        Status status = (Status) o;
+        return Objects.equals(name, status.name) &&
+                Objects.equals(description, status.description);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, description, successors);
+    }
 }

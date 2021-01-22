@@ -7,6 +7,7 @@ import org.tdakkota.ncproject.services.IncidentService;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Path("/incident")
@@ -54,16 +55,20 @@ public class IncidentResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Incident add(Incident incidentToSave) {
-        return service.add(incidentToSave);
+    public Response add(Incident incidentToSave) {
+        return Response.status(Response.Status.CREATED).
+                entity(service.add(incidentToSave)).
+                build();
     }
 
     @PUT
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Incident update(Incident incidentToSave) {
-        return service.update(incidentToSave);
+    public Response update(@PathParam("id") Long id, Incident incidentToSave) {
+        return Response.status(Response.Status.CREATED).
+                entity(service.update(id, incidentToSave)).
+                build();
     }
 
     @DELETE

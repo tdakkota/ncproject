@@ -20,6 +20,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -52,11 +53,35 @@ public class User extends PanacheEntity {
     @OneToMany(mappedBy = "assignee", cascade = CascadeType.ALL)
     public Set<Incident> assignedIncidents = Collections.emptySet();
 
+    public User update(User e) {
+        this.username = e.username;
+        this.password = e.password;
+        this.name = e.name;
+        this.role = e.role;
+        this.createdAt = e.createdAt;
+        this.assignedIncidents = new HashSet<>(e.assignedIncidents);
+        this.persist();
+        return this;
+    }
+
     public String getPassword() {
         return password;
     }
 
     public void setPassword(String password) {
         this.password = BcryptUtil.bcryptHash(password);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", name='" + name + '\'' +
+                ", role='" + role + '\'' +
+                ", createdAt=" + createdAt +
+                ", assignedIncidents=" + assignedIncidents +
+                ", id=" + id +
+                '}';
     }
 }

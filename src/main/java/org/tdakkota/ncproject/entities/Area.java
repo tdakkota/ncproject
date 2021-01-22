@@ -23,4 +23,20 @@ public class Area extends PanacheEntity {
     public String name = "";
     @Length(max = 1000)
     public String description = "";
+
+    public Area update(Area e) {
+        this.name = e.name;
+        this.description = e.description;
+        this.persist();
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "Area{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", id=" + id +
+                '}';
+    }
 }

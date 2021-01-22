@@ -28,4 +28,12 @@ public class IncidentEvent {
     public enum EventType {
         OPENED, UPDATED, CLOSED
     }
+
+    @Override
+    public String toString() {
+        return "IncidentEvent{" +
+                "type=" + type +
+                ", id=" + id +
+                '}';
+    }
 }

@@ -37,7 +37,7 @@ public class UserResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response add(@Valid User e) {
         e.persist();
-        return Response.ok(e).build();
+        return Response.status(Response.Status.CREATED).entity(e).build();
     }
 
     @Transactional
@@ -49,11 +49,10 @@ public class UserResource {
         User exist = User.findById(id);
         if (exist == null) {
             e.persist();
-            return Response.status(Response.Status.NO_CONTENT).entity(e).build();
+            return Response.status(Response.Status.CREATED).entity(e).build();
         }
 
-        User result = exist.getEntityManager().merge(e);
-        result.persist();
+        User result = exist.update(e);
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 

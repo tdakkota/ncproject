@@ -37,7 +37,7 @@ public class AreaResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response add(@Valid Area e) {
         e.persist();
-        return Response.ok(e).build();
+        return Response.status(Response.Status.CREATED).entity(e).build();
     }
 
     @Transactional
@@ -49,11 +49,10 @@ public class AreaResource {
         Area exist = Area.findById(id);
         if (exist == null) {
             e.persist();
-            return Response.status(Response.Status.NO_CONTENT).entity(e).build();
+            return Response.status(Response.Status.CREATED).entity(e).build();
         }
 
-        Area result = exist.getEntityManager().merge(e);
-        result.persist();
+        Area result = exist.update(e);
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 

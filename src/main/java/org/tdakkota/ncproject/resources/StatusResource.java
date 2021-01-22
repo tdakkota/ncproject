@@ -37,7 +37,7 @@ public class StatusResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response add(@Valid Status e) {
         e.persist();
-        return Response.ok(e).build();
+        return Response.status(Response.Status.CREATED).entity(e).build();
     }
 
     @Transactional
@@ -49,12 +49,11 @@ public class StatusResource {
         Status exist = Status.findById(id);
         if (exist == null) {
             e.persist();
-            return Response.status(Response.Status.NO_CONTENT).entity(e).build();
+            return Response.status(Response.Status.CREATED).entity(e).build();
         }
 
-        Status result = exist.getEntityManager().merge(e);
-        result.persist();
-        return Response.status(Response.Status.CREATED).entity(result).build();
+        Status result = exist.update(e);
+        return Response.status(Response.Status.CREATED).entity(exist).build();
     }
 
     @Transactional

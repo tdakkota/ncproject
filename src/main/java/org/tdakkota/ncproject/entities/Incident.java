@@ -42,6 +42,20 @@ public class Incident extends PanacheEntity {
     public Status status;
     public boolean closed = false;
 
+    public Incident update(Incident e) {
+        this.icon = e.icon;
+        this.name = e.name;
+        this.assignee = e.assignee;
+        this.area = e.area;
+        this.timeline = e.timeline;
+        this.description = e.description;
+        this.priority = e.priority;
+        this.status = e.status;
+        this.closed = e.closed;
+        this.persist();
+        return this;
+    }
+
     @Override
     public String toString() {
         return "Incident{" +

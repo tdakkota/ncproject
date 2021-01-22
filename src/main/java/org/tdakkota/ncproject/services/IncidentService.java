@@ -66,19 +66,13 @@ public class IncidentService {
     }
 
     @Transactional
-    public Incident update(@Valid Incident incidentToSave) {
-        incidentToSave.persist();
-
-        Incident exist = Incident.findById(incidentToSave.id);
+    public Incident update(Long id, @Valid Incident incidentToSave) {
+        Incident exist = Incident.findById(id);
         if (exist == null) {
-            incidentToSave.persist();
-            this.emitter.opened(incidentToSave);
-            return incidentToSave;
+            return add(incidentToSave);
         }
 
-        Incident result = exist.getEntityManager().merge(incidentToSave);
-        result.persist();
-
+        Incident result = exist.update(incidentToSave);
         this.log.debug("Incident updated:" + result.toString());
         this.emitter.updated(result);
         return result;
