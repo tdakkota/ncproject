@@ -1,0 +1,10 @@
+quarkus:
+  datasource:
+    db-kind: postgresql
+    usenrame: ncapp
+    password: ncapp
+    jdbc:
+      url: jdbc:postgresql://localhost:5432/test_db
+  hibernate-orm:
+    database:
+      generation: drop-and-create
