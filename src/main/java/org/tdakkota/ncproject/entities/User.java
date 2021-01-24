@@ -46,6 +46,7 @@ public class User extends PanacheEntity {
     public Date createdAt = new Date();
 
     @OneToMany(mappedBy = "assignee")
+    @JsonIgnore
     public Set<Incident> assignedIncidents = Collections.emptySet();
 
     @Password
