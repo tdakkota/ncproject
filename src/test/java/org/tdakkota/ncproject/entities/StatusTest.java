@@ -19,13 +19,15 @@ class StatusTest {
         Validator validator = config.getValidator();
 
         assertFalse(validator.validate(new Status()).isEmpty());
+
         Status s = new Status();
         s.setId(10L);
-        s.setName("abc");
-        s.setSuccessors(Collections.emptyList());
-        assertTrue(validator.validate(s).isEmpty());
 
-        s.setSuccessors(Collections.singletonList(s));
-        assertFalse(validator.validate(s).isEmpty());
+        StatusBody statusBody = new StatusBody();
+        statusBody.setName("abc");
+        statusBody.setSuccessors(Collections.emptyList());
+        s.setBody(statusBody);
+
+        assertTrue(validator.validate(s).isEmpty());
     }
 }

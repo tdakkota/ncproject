@@ -1,6 +1,7 @@
 package org.tdakkota.ncproject.constraints;
 
 import org.tdakkota.ncproject.entities.Status;
+import org.tdakkota.ncproject.entities.StatusBody;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -21,18 +22,19 @@ public class NotRecursiveConstraintValidator implements ConstraintValidator<NotR
      */
     @Override
     public boolean isValid(Status value, ConstraintValidatorContext context) {
-        if (value == null) {
+        if (value == null || value.getBody() == null) {
             return false;
         }
 
-        List<Status> successors = value.getSuccessors();
+        StatusBody body = value.getBody();
+        List<Long> successors = body.getSuccessors();
         if (successors == null || successors.isEmpty()) {
             return true;
         }
+
         // Check that successors does not contain parent Status.
-        return successors.stream().filter(Objects::nonNull)
-                .map(Status::getId)
-                .filter(Objects::nonNull).
+        return successors.stream().
+                filter(Objects::nonNull).
                 noneMatch(sub -> sub.equals(value.getId()));
     }
 }

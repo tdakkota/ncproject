@@ -4,9 +4,9 @@ import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 import org.tdakkota.ncproject.entities.Status;
+import org.tdakkota.ncproject.entities.StatusBody;
 
 import javax.inject.Inject;
-import java.util.Collections;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,27 +14,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 @TestHTTPEndpoint(StatusResource.class)
-class StatusResourceTest implements ResourceTest<Status> {
+class StatusResourceTest implements ResourceTest<StatusBody> {
     @Inject
     StatusResource service;
 
     @Test
     void crudOps() {
         // Bad empty Status
-        add(new Status()).statusCode(400);
+        add(new StatusBody()).statusCode(400);
 
-        Status badName = new Status();
+        StatusBody badName = new StatusBody();
         badName.setName("badName".repeat(100));
         add(badName).statusCode(400);
 
-        Status good = new Status();
+        StatusBody good = new StatusBody();
         good.setName("good");
         Status createResponse = add(good)
                 .statusCode(201)
                 .extract()
                 .as(Status.class);
-        good.setId(createResponse.getId());
-        assertEquals(good, createResponse);
+        assertEquals(good, createResponse.getBody());
 
         Status getResponse = get(createResponse.getId())
                 .statusCode(200)
@@ -42,15 +41,13 @@ class StatusResourceTest implements ResourceTest<Status> {
                 .as(Status.class);
         assertEquals(createResponse, getResponse);
 
-        Status update = new Status();
+        StatusBody update = new StatusBody();
         update.setName("updateGood");
         Status updateResponse = update(createResponse.getId(), update)
                 .statusCode(201)
                 .extract()
                 .as(Status.class);
-        update.setId(updateResponse.getId());
-        assertEquals(update, updateResponse);
-
+        assertEquals(update, updateResponse.getBody());
 
         getResponse = get(createResponse.getId())
                 .statusCode(200)
@@ -72,25 +69,5 @@ class StatusResourceTest implements ResourceTest<Status> {
         get(createResponse.getId()).statusCode(404);
         listResponse = list().statusCode(200).extract().as(Status[].class);
         assertTrue(Stream.of(listResponse).noneMatch(i -> i.getId().equals(createResponse.getId())));
-    }
-
-    @Test
-    void selfReferential() {
-        Status good = new Status();
-        good.setName("good");
-        Status createResponse = add(good)
-                .statusCode(201)
-                .extract()
-                .as(Status.class);
-        assertEquals(good.getName(), createResponse.getName());
-
-        Status selfReferential = new Status();
-        selfReferential.setId(createResponse.getId());
-        selfReferential.setName(createResponse.getName());
-        selfReferential.setSuccessors(Collections.singletonList(createResponse));
-        update(createResponse.getId(), selfReferential).statusCode(400);
-
-        selfReferential.setSuccessors(Collections.emptyList());
-        update(createResponse.getId(), selfReferential).statusCode(201);
     }
 }

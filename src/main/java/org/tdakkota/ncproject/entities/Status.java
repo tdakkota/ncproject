@@ -1,18 +1,20 @@
 package org.tdakkota.ncproject.entities;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import lombok.*;
-import org.hibernate.validator.constraints.Length;
-import org.tdakkota.ncproject.constraints.Mergeable;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 import org.tdakkota.ncproject.constraints.NotRecursive;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import javax.validation.constraints.NotNull;
+import java.time.Instant;
+import java.util.Date;
 
 @RegisterForReflection
 @NoArgsConstructor
@@ -20,42 +22,22 @@ import java.util.stream.Collectors;
 @Data
 @Entity
 @Table(name = "statuses")
-@NotRecursive
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "id")
-public class Status implements Mergeable<Status> {
+@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
+public class Status {
     @Id
     @GeneratedValue
     private Long id;
 
-    @NotBlank(message = "Name may not be blank")
-    @Length(max = 50)
+    @NotNull
     @NonNull
-    private String name;
+    private Date creationDate = Date.from(Instant.now());
 
-    @Length(max = 1000)
-    private String description = "";
+    private Date modificationDate;
 
-    @OneToMany(mappedBy = "id")
-    @EqualsAndHashCode.Exclude
-    private List<Status> successors = new ArrayList<>();
-
-    public void merge(Status e) {
-        this.name = e.name;
-        this.description = e.description;
-        this.successors = new ArrayList<>(e.successors);
-    }
-
-    @Override
-    public String toString() {
-        String successors = this.successors.stream().
-                filter(a -> a != this)
-                .map(Object::toString)
-                .collect(Collectors.joining(","));
-        return "Status{" +
-                "name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", successors=[" + successors + "], id=" + id +
-                '}';
-    }
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "jsonb")
+    @NotNull
+    @NonNull
+    @JsonUnwrapped
+    private StatusBody body;
 }

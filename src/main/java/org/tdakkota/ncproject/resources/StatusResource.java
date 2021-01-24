@@ -3,6 +3,7 @@ package org.tdakkota.ncproject.resources;
 import io.quarkus.panache.common.Page;
 import org.jboss.resteasy.spi.NoLogWebApplicationException;
 import org.tdakkota.ncproject.entities.Status;
+import org.tdakkota.ncproject.entities.StatusBody;
 import org.tdakkota.ncproject.repos.StatusRepository;
 
 import javax.inject.Inject;
@@ -41,9 +42,8 @@ public class StatusResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response add(@Valid Status e) {
-        repo.persist(e);
-        return Response.status(Response.Status.CREATED).entity(e).build();
+    public Response add(@Valid StatusBody e) {
+        return Response.status(Response.Status.CREATED).entity(repo.persist(e)).build();
     }
 
     @Transactional
@@ -51,9 +51,8 @@ public class StatusResource {
     @Path("{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response update(@PathParam("id") Long id, @Valid Status e) {
-        Status result = repo.update(id, e);
-        return Response.status(Response.Status.CREATED).entity(result).build();
+    public Response update(@PathParam("id") Long id, @Valid StatusBody e) {
+        return Response.status(Response.Status.CREATED).entity(repo.update(id, e)).build();
     }
 
     @Transactional

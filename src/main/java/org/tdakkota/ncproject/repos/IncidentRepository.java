@@ -35,36 +35,32 @@ public class IncidentRepository implements PanacheRepository<Incident> {
 
         User user = users.findById(e.getAssignee());
         if (user == null) {
-            throw new IncidentRepositoryException("user not found");
+            throw new RepositoryException("user not found");
         }
         i.setAssignee(user);
 
         Area area = areas.findById(e.getArea());
         if (area == null) {
-            throw new IncidentRepositoryException("area not found");
+            throw new RepositoryException("area not found");
         }
         i.setArea(area);
 
         Status status = statuses.findById(e.getStatus());
         if (status == null) {
-            throw new IncidentRepositoryException("status not found");
+            throw new RepositoryException("status not found");
         }
         i.setStatus(status);
     }
 
     public Incident add(AddIncidentRequest e) {
         Incident toPersist = new Incident();
+
         fillFrom(toPersist, e);
         this.persist(toPersist);
         return toPersist;
     }
 
-    public Incident update(Long id, AddIncidentRequest e) {
-        Incident exist = findById(id);
-        if (exist == null) {
-            exist = new Incident();
-        }
-
+    public Incident update(Incident exist, AddIncidentRequest e) {
         fillFrom(exist, e);
         this.persist(exist);
         return exist;

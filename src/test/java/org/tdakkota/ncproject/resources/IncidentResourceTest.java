@@ -18,8 +18,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -63,7 +62,7 @@ class IncidentResourceTest implements ResourceTest<Incident> {
 
     private User user;
     private Area area;
-    private Status status;
+    private List<Status> status = new ArrayList<>();
 
     @BeforeEach
     @Transactional
@@ -80,10 +79,16 @@ class IncidentResourceTest implements ResourceTest<Incident> {
         areas.persist(area);
         this.area = area;
 
-        Status status = new Status();
-        status.setName("teststatus");
-        statuses.persist(status);
-        this.status = status;
+        StatusBody statusBody = new StatusBody();
+        statusBody.setName("teststatus2");
+        Status s = statuses.persist(statusBody);
+        this.status.add(s);
+
+        long id = s.getId();
+        statusBody = new StatusBody();
+        statusBody.setName("teststatus");
+        statusBody.setSuccessors(Collections.singletonList(id));
+        this.status.add(statuses.persist(statusBody));
     }
 
     @Test
@@ -103,7 +108,7 @@ class IncidentResourceTest implements ResourceTest<Incident> {
                 "good",
                 this.user,
                 this.area,
-                this.status,
+                this.status.get(0),
                 timeline
         );
 

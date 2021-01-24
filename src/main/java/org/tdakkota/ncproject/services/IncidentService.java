@@ -4,14 +4,17 @@ import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Sort;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.spi.NoLogWebApplicationException;
+import org.tdakkota.ncproject.api.APIError;
 import org.tdakkota.ncproject.api.AddIncidentRequest;
 import org.tdakkota.ncproject.entities.Incident;
+import org.tdakkota.ncproject.entities.StatusBody;
 import org.tdakkota.ncproject.repos.IncidentRepository;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 @ApplicationScoped
@@ -63,7 +66,24 @@ public class IncidentService {
 
     @Transactional
     public Incident update(Long id, @Valid AddIncidentRequest req) {
-        Incident result = repo.update(id, req);
+        Incident exist = repo.findById(id);
+        if (exist == null) {
+            exist = repo.add(req);
+            this.log.debug("Incident created:" + exist.toString());
+            this.emitter.opened(exist);
+            return exist;
+        }
+
+        StatusBody from = exist.getStatus().getBody();
+        if (!from.getSuccessors().contains(req.getStatus())) {
+            throw new NoLogWebApplicationException(
+                    Response.status(Response.Status.BAD_REQUEST)
+                            .entity(new APIError("invalid new status"))
+                            .build()
+            );
+        }
+
+        Incident result = repo.update(exist, req);
         this.log.debug("Incident updated:" + result.toString());
         this.emitter.updated(result);
         return result;
