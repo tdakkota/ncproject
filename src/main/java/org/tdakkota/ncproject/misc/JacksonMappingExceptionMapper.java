@@ -1,6 +1,7 @@
 package org.tdakkota.ncproject.misc;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
+import org.tdakkota.ncproject.entities.APIError;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -23,7 +24,7 @@ public class JacksonMappingExceptionMapper implements ExceptionMapper<JsonMappin
     public Response toResponse(JsonMappingException exception) {
         return Response.status(Response.Status.BAD_REQUEST).
                 type(MediaType.APPLICATION_JSON_TYPE).
-                entity(exception.getMessage()).
+                entity(new APIError(exception.getMessage())).
                 build();
     }
 }
