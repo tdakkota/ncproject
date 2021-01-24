@@ -1,5 +1,7 @@
 package org.tdakkota.ncproject.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.quarkus.elytron.security.common.BcryptUtil;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.runtime.annotations.RegisterForReflection;
@@ -12,10 +14,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.util.Collections;
@@ -34,11 +33,8 @@ public class User extends PanacheEntity {
     @Username
     @NotBlank(message = "Username may not be blank")
     @Length(max = 20)
+    @Column(unique = true)
     public String username;
-
-    @Password
-    @NotBlank(message = "Password may not be blank")
-    private String password;
 
     @NotBlank(message = "Name may not be blank")
     @Pattern(regexp = "^[a-zA-Z][\\sa-zA-Z]*$")
@@ -47,11 +43,20 @@ public class User extends PanacheEntity {
 
     @Roles
     public String role = "user";
-
     public Date createdAt = new Date();
 
-    @OneToMany(mappedBy = "assignee", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "assignee")
     public Set<Incident> assignedIncidents = Collections.emptySet();
+
+    @Password
+    @EqualsAndHashCode.Exclude
+    private String password;
+
+    public User(UserSignUp signUp) {
+        this.username = signUp.getUsername();
+        this.name = signUp.getName();
+        this.password = signUp.getPassword();
+    }
 
     public User update(User e) {
         this.username = e.username;
@@ -64,11 +69,17 @@ public class User extends PanacheEntity {
         return this;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
 
     public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @JsonProperty("password")
+    public void setEncryptedPassword(String password) {
         this.password = BcryptUtil.bcryptHash(password);
     }
 

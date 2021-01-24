@@ -1,6 +1,7 @@
 package org.tdakkota.ncproject.resources;
 
 import io.quarkus.panache.common.Page;
+import org.tdakkota.ncproject.entities.AddIncidentRequest;
 import org.tdakkota.ncproject.entities.Incident;
 import org.tdakkota.ncproject.services.IncidentService;
 
@@ -55,7 +56,7 @@ public class IncidentResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response add(Incident incidentToSave) {
+    public Response add(AddIncidentRequest incidentToSave) {
         return Response.status(Response.Status.CREATED).
                 entity(service.add(incidentToSave)).
                 build();
@@ -65,7 +66,7 @@ public class IncidentResource {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response update(@PathParam("id") Long id, Incident incidentToSave) {
+    public Response update(@PathParam("id") Long id, AddIncidentRequest incidentToSave) {
         return Response.status(Response.Status.CREATED).
                 entity(service.update(id, incidentToSave)).
                 build();

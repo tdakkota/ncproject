@@ -3,13 +3,13 @@ package org.tdakkota.ncproject.services;
 import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Sort;
 import org.jboss.logging.Logger;
-import org.tdakkota.ncproject.entities.Incident;
+import org.jboss.resteasy.spi.NoLogWebApplicationException;
+import org.tdakkota.ncproject.entities.*;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import javax.ws.rs.WebApplicationException;
 import java.util.List;
 
 @ApplicationScoped
@@ -23,7 +23,7 @@ public class IncidentService {
     public Incident get(Long id) {
         Incident incident = Incident.findById(id);
         if (incident == null) {
-            throw new WebApplicationException(404);
+            throw new NoLogWebApplicationException(404);
         }
         return incident;
     }
@@ -56,23 +56,52 @@ public class IncidentService {
                 list();
     }
 
-    @Transactional
-    public Incident add(@Valid Incident incidentToSave) {
-        incidentToSave.persist();
+    private Incident update(Incident i, AddIncidentRequest e) {
+        i.icon = e.icon;
+        i.name = e.name;
+        i.timeline = e.timeline;
+        i.description = e.description;
+        i.priority = e.priority;
+        i.closed = e.closed;
 
-        this.log.debug("Incident created:" + incidentToSave.toString());
-        this.emitter.opened(incidentToSave);
-        return incidentToSave;
+        User user = User.findById(e.assignee);
+        if (user == null) {
+            throw new IncidentServiceException("user not found");
+        }
+        i.assignee = user;
+
+        Area area = Area.findById(e.area);
+        if (area == null) {
+            throw new IncidentServiceException("area not found");
+        }
+        i.area = area;
+
+        Status status = Status.findById(e.status);
+        if (status == null) {
+            throw new IncidentServiceException("status not found");
+        }
+        i.status = status;
+
+        i.persist();
+        return i;
     }
 
     @Transactional
-    public Incident update(Long id, @Valid Incident incidentToSave) {
+    public Incident add(@Valid AddIncidentRequest req) {
+        Incident incident = update(new Incident(), req);
+        this.log.debug("Incident created:" + incident.toString());
+        this.emitter.opened(incident);
+        return incident;
+    }
+
+    @Transactional
+    public Incident update(Long id, @Valid AddIncidentRequest req) {
         Incident exist = Incident.findById(id);
         if (exist == null) {
-            return add(incidentToSave);
+            return add(req);
         }
 
-        Incident result = exist.update(incidentToSave);
+        Incident result = update(exist, req);
         this.log.debug("Incident updated:" + result.toString());
         this.emitter.updated(result);
         return result;
@@ -82,7 +111,7 @@ public class IncidentService {
     public void close(Long id) {
         Incident incident = Incident.findById(id);
         if (incident == null) {
-            throw new WebApplicationException(404);
+            throw new NoLogWebApplicationException(404);
         }
         incident.closed = true;
         incident.persist();

@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = false)
 public class IncidentEvent {
     public EventType type;
+
     public long id;
 
     public static IncidentEvent opened(Incident i) {
@@ -25,15 +26,15 @@ public class IncidentEvent {
         return new IncidentEvent(EventType.CLOSED, i.id);
     }
 
-    public enum EventType {
-        OPENED, UPDATED, CLOSED
-    }
-
     @Override
     public String toString() {
         return "IncidentEvent{" +
                 "type=" + type +
                 ", id=" + id +
                 '}';
+    }
+
+    public enum EventType {
+        OPENED, UPDATED, CLOSED
     }
 }

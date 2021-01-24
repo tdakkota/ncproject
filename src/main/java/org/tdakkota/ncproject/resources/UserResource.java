@@ -1,7 +1,9 @@
 package org.tdakkota.ncproject.resources;
 
 import io.quarkus.panache.common.Page;
+import org.jboss.resteasy.spi.NoLogWebApplicationException;
 import org.tdakkota.ncproject.entities.User;
+import org.tdakkota.ncproject.entities.UserSignUp;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -18,7 +20,7 @@ public class UserResource {
     public User get(@PathParam("id") Long id) {
         User status = User.findById(id);
         if (status == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND);
+            throw new NoLogWebApplicationException(Response.Status.NOT_FOUND);
         }
         return status;
     }
@@ -31,14 +33,22 @@ public class UserResource {
         return User.findAll().page(page).list();
     }
 
+    @Transactional
     @POST
     @Path("signup")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response add(@Valid User e) {
+    public Response add(@Valid UserSignUp signUp) {
+        User u = User.find("from User as u where u.username = ?1", signUp.getUsername()).firstResult();
+        if (u != null) {
+            return Response.status(Response.Status.CONFLICT).build();
+        }
+
+        User e = new User(signUp);
         e.persist();
         return Response.status(Response.Status.CREATED).entity(e).build();
     }
+
 
     @Transactional
     @PUT
@@ -61,7 +71,7 @@ public class UserResource {
     @Path("{id}")
     public void delete(@PathParam("id") Long id) {
         if (!User.deleteById(id)) {
-            throw new WebApplicationException(404);
+            throw new NoLogWebApplicationException(404);
         }
     }
 }

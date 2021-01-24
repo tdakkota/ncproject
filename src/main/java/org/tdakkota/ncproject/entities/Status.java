@@ -30,6 +30,7 @@ public class Status extends PanacheEntity {
     @NotBlank(message = "Name may not be blank")
     @Length(max = 50)
     public String name = "";
+
     @Length(max = 1000)
     public String description = "";
 

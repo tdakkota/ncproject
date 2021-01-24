@@ -10,7 +10,6 @@ import org.tdakkota.ncproject.constraints.TimelineValid;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.Date;
@@ -23,38 +22,32 @@ import java.util.Date;
 @Table(name = "incidents")
 public class Incident extends PanacheEntity {
     public String icon;
+
     @Length(max = 50)
     @NotBlank(message = "Name may not be blank")
     public String name;
+
     @ManyToOne(fetch = FetchType.LAZY)
     public User assignee;
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     public Area area;
+
     @Embedded
     @TimelineValid
     @NotNull
     public Timeline timeline;
+
     @Length(max = 100)
     public String description;
-    @Enumerated(EnumType.STRING)
-    public Priority priority;
-    @ManyToOne(fetch = FetchType.LAZY)
-    public Status status;
-    public boolean closed = false;
 
-    public Incident update(Incident e) {
-        this.icon = e.icon;
-        this.name = e.name;
-        this.assignee = e.assignee;
-        this.area = e.area;
-        this.timeline = e.timeline;
-        this.description = e.description;
-        this.priority = e.priority;
-        this.status = e.status;
-        this.closed = e.closed;
-        this.persist();
-        return this;
-    }
+    @Enumerated(EnumType.STRING)
+    public Priority priority = Priority.NORMAL;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    public Status status;
+
+    public boolean closed = false;
 
     @Override
     public String toString() {
@@ -79,9 +72,9 @@ public class Incident extends PanacheEntity {
     @Embeddable
     @EqualsAndHashCode(callSuper = false)
     public static class Timeline {
-        @NotEmpty
+        @NotNull
         public Date start;
-        @NotEmpty
+        @NotNull
         public Date due;
 
         public Timeline() {

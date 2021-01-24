@@ -21,6 +21,7 @@ public class Area extends PanacheEntity {
     @NotBlank(message = "Name may not be blank")
     @Length(max = 50)
     public String name = "";
+
     @Length(max = 1000)
     public String description = "";
 

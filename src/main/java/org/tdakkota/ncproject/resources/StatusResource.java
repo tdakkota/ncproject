@@ -1,6 +1,7 @@
 package org.tdakkota.ncproject.resources;
 
 import io.quarkus.panache.common.Page;
+import org.jboss.resteasy.spi.NoLogWebApplicationException;
 import org.tdakkota.ncproject.entities.Status;
 
 import javax.transaction.Transactional;
@@ -18,7 +19,7 @@ public class StatusResource {
     public Status get(@PathParam("id") Long id) {
         Status status = Status.findById(id);
         if (status == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND);
+            throw new NoLogWebApplicationException(Response.Status.NOT_FOUND);
         }
         return status;
     }
@@ -61,7 +62,7 @@ public class StatusResource {
     @Path("{id}")
     public void delete(@PathParam("id") Long id) {
         if (!Status.deleteById(id)) {
-            throw new WebApplicationException(404);
+            throw new NoLogWebApplicationException(404);
         }
     }
 }
