@@ -1,7 +1,7 @@
 package org.tdakkota.ncproject.misc;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
-import org.tdakkota.ncproject.entities.APIError;
+import org.tdakkota.ncproject.api.APIError;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;

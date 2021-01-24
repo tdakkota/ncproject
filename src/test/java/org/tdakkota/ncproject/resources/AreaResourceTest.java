@@ -23,32 +23,34 @@ class AreaResourceTest implements ResourceTest<Area> {
         add(new Area()).statusCode(400);
 
         Area badName = new Area();
-        badName.name = "badName".repeat(100);
+        badName.setName("badName".repeat(100));
         add(badName).statusCode(400);
 
         Area good = new Area();
-        good.name = "good";
+        good.setName("good");
         Area createResponse = add(good)
                 .statusCode(201)
                 .extract()
                 .as(Area.class);
+        good.setId(createResponse.getId());
         assertEquals(good, createResponse);
 
-        Area getResponse = get(createResponse.id)
+        Area getResponse = get(createResponse.getId())
                 .statusCode(200)
                 .extract()
                 .as(Area.class);
         assertEquals(createResponse, getResponse);
 
         Area update = new Area();
-        update.name = "updateGood";
-        Area updateResponse = update(createResponse.id, update)
+        update.setName("updateGood");
+        Area updateResponse = update(createResponse.getId(), update)
                 .statusCode(201)
                 .extract()
                 .as(Area.class);
+        update.setId(updateResponse.getId());
         assertEquals(update, updateResponse);
 
-        getResponse = get(createResponse.id)
+        getResponse = get(createResponse.getId())
                 .statusCode(200)
                 .extract()
                 .as(Area.class);
@@ -58,15 +60,15 @@ class AreaResourceTest implements ResourceTest<Area> {
         assertEquals(
                 updateResponse,
                 Stream.of(listResponse).
-                        filter(i -> i.id.equals(createResponse.id)).
+                        filter(i -> i.getId().equals(createResponse.getId())).
                         findFirst().orElseThrow()
         );
 
-        delete(createResponse.id).statusCode(204);
-        delete(createResponse.id).statusCode(404);
+        delete(createResponse.getId()).statusCode(204);
+        delete(createResponse.getId()).statusCode(404);
 
-        get(createResponse.id).statusCode(404);
+        get(createResponse.getId()).statusCode(404);
         listResponse = list().statusCode(200).extract().as(Area[].class);
-        assertTrue(Stream.of(listResponse).noneMatch(i -> i.id.equals(createResponse.id)));
+        assertTrue(Stream.of(listResponse).noneMatch(i -> i.getId().equals(createResponse.getId())));
     }
 }

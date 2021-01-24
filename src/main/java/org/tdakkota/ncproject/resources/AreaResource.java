@@ -3,7 +3,9 @@ package org.tdakkota.ncproject.resources;
 import io.quarkus.panache.common.Page;
 import org.jboss.resteasy.spi.NoLogWebApplicationException;
 import org.tdakkota.ncproject.entities.Area;
+import org.tdakkota.ncproject.repos.AreaRepository;
 
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -13,11 +15,14 @@ import java.util.List;
 
 @Path("/area")
 public class AreaResource {
+    @Inject
+    AreaRepository repo;
+
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Area get(@PathParam("id") Long id) {
-        Area status = Area.findById(id);
+        Area status = repo.findById(id);
         if (status == null) {
             throw new NoLogWebApplicationException(Response.Status.NOT_FOUND);
         }
@@ -29,7 +34,7 @@ public class AreaResource {
     public List<Area> list(@QueryParam("page") @DefaultValue("0") int pageIndex,
                            @QueryParam("size") @DefaultValue("20") int pageSize) {
         Page page = Page.of(pageIndex, pageSize);
-        return Area.findAll().page(page).list();
+        return repo.findAll().page(page).list();
     }
 
     @Transactional
@@ -37,7 +42,7 @@ public class AreaResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response add(@Valid Area e) {
-        e.persist();
+        repo.persist(e);
         return Response.status(Response.Status.CREATED).entity(e).build();
     }
 
@@ -47,13 +52,7 @@ public class AreaResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response update(@PathParam("id") Long id, @Valid Area e) {
-        Area exist = Area.findById(id);
-        if (exist == null) {
-            e.persist();
-            return Response.status(Response.Status.CREATED).entity(e).build();
-        }
-
-        Area result = exist.update(e);
+        Area result = repo.update(id, e);
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
@@ -61,7 +60,7 @@ public class AreaResource {
     @DELETE
     @Path("{id}")
     public void delete(@PathParam("id") Long id) {
-        if (!Area.deleteById(id)) {
+        if (!repo.deleteById(id)) {
             throw new NoLogWebApplicationException(404);
         }
     }

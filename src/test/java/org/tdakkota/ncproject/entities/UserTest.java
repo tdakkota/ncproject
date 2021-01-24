@@ -19,13 +19,12 @@ class UserTest {
 
         assertFalse(validator.validate(new User()).isEmpty());
         User s = new User();
-        s.id = 10L;
-        s.name = "Admin";
-        s.username = "admin";
-        s.setPassword("qwerty");
+        s.setName("Admin");
+        s.setUsername("admin");
+        s.setEncryptedPassword("qwerty");
         assertTrue(validator.validate(s).isEmpty());
 
-        s.name = "12345";
+        s.setName("12345");
         assertFalse(validator.validate(s).isEmpty());
     }
 }

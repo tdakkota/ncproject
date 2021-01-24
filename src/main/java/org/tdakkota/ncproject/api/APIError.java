@@ -1,4 +1,4 @@
-package org.tdakkota.ncproject.entities;
+package org.tdakkota.ncproject.api;
 
 import lombok.AllArgsConstructor;
 

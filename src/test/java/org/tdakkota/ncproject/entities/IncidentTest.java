@@ -21,17 +21,16 @@ class IncidentTest {
 
         assertFalse(validator.validate(new Incident()).isEmpty());
         Incident s = new Incident();
-        s.id = 10L;
-        s.name = "abc";
-        s.assignee = new User();
-        s.area = new Area();
+        s.setName("abc");
+        s.setAssignee(new User());
+        s.setArea(new Area());
         assertFalse(validator.validate(s).isEmpty());
 
         Instant now = Instant.now();
-        s.timeline = new Incident.Timeline(now, now.minus(Duration.ofDays(300)));
+        s.setTimeline(new Timeline(now, now.minus(Duration.ofDays(300))));
         assertFalse(validator.validate(s).isEmpty());
 
-        s.timeline = new Incident.Timeline(now.minus(Duration.ofDays(300)), now);
+        s.setTimeline(new Timeline(now.minus(Duration.ofDays(300)), now));
         assertTrue(validator.validate(s).isEmpty());
     }
 }

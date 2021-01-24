@@ -2,36 +2,28 @@ package org.tdakkota.ncproject.entities;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @RegisterForReflection
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
+@Data
 public class IncidentEvent {
-    public EventType type;
+    private EventType type;
 
-    public long id;
+    private long id;
 
     public static IncidentEvent opened(Incident i) {
-        return new IncidentEvent(EventType.OPENED, i.id);
+        return new IncidentEvent(EventType.OPENED, i.getId());
     }
 
     public static IncidentEvent updated(Incident i) {
-        return new IncidentEvent(EventType.UPDATED, i.id);
+        return new IncidentEvent(EventType.UPDATED, i.getId());
     }
 
     public static IncidentEvent closed(Incident i) {
-        return new IncidentEvent(EventType.CLOSED, i.id);
-    }
-
-    @Override
-    public String toString() {
-        return "IncidentEvent{" +
-                "type=" + type +
-                ", id=" + id +
-                '}';
+        return new IncidentEvent(EventType.CLOSED, i.getId());
     }
 
     public enum EventType {

@@ -1,11 +1,12 @@
 package org.tdakkota.ncproject.constraints;
 
 import org.tdakkota.ncproject.entities.Incident;
+import org.tdakkota.ncproject.entities.Timeline;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-public class TimelineValidConstraintValidator implements ConstraintValidator<TimelineValid, Incident.Timeline> {
+public class TimelineValidConstraintValidator implements ConstraintValidator<TimelineValid, Timeline> {
     /**
      * Implements the validation logic.
      * The state of {@code value} must not be altered.
@@ -18,10 +19,10 @@ public class TimelineValidConstraintValidator implements ConstraintValidator<Tim
      * @return {@code false} if {@code value} does not pass the constraint
      */
     @Override
-    public boolean isValid(Incident.Timeline value, ConstraintValidatorContext context) {
+    public boolean isValid(Timeline value, ConstraintValidatorContext context) {
         return value != null &&
-                value.start != null &&
-                value.due != null &&
-                value.start.before(value.due);
+                value.getStart() != null &&
+                value.getDue() != null &&
+                value.getStart().before(value.getDue());
     }
 }

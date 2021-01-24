@@ -3,7 +3,9 @@ package org.tdakkota.ncproject.resources;
 import io.quarkus.panache.common.Page;
 import org.jboss.resteasy.spi.NoLogWebApplicationException;
 import org.tdakkota.ncproject.entities.Status;
+import org.tdakkota.ncproject.repos.StatusRepository;
 
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -13,11 +15,14 @@ import java.util.List;
 
 @Path("/status")
 public class StatusResource {
+    @Inject
+    StatusRepository repo;
+
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Status get(@PathParam("id") Long id) {
-        Status status = Status.findById(id);
+        Status status = repo.findById(id);
         if (status == null) {
             throw new NoLogWebApplicationException(Response.Status.NOT_FOUND);
         }
@@ -29,7 +34,7 @@ public class StatusResource {
     public List<Status> list(@QueryParam("page") @DefaultValue("0") int pageIndex,
                              @QueryParam("size") @DefaultValue("20") int pageSize) {
         Page page = Page.of(pageIndex, pageSize);
-        return Status.findAll().page(page).list();
+        return repo.findAll().page(page).list();
     }
 
     @Transactional
@@ -37,7 +42,7 @@ public class StatusResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response add(@Valid Status e) {
-        e.persist();
+        repo.persist(e);
         return Response.status(Response.Status.CREATED).entity(e).build();
     }
 
@@ -47,21 +52,15 @@ public class StatusResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response update(@PathParam("id") Long id, @Valid Status e) {
-        Status exist = Status.findById(id);
-        if (exist == null) {
-            e.persist();
-            return Response.status(Response.Status.CREATED).entity(e).build();
-        }
-
-        Status result = exist.update(e);
-        return Response.status(Response.Status.CREATED).entity(exist).build();
+        Status result = repo.update(id, e);
+        return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
     @Transactional
     @DELETE
     @Path("{id}")
     public void delete(@PathParam("id") Long id) {
-        if (!Status.deleteById(id)) {
+        if (!repo.deleteById(id)) {
             throw new NoLogWebApplicationException(404);
         }
     }

@@ -1,7 +1,8 @@
-package org.tdakkota.ncproject.entities;
+package org.tdakkota.ncproject.api;
 
 import io.quarkus.elytron.security.common.BcryptUtil;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
@@ -10,6 +11,7 @@ import javax.validation.constraints.Pattern;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class UserSignUp {
     @NotBlank(message = "Username may not be blank")
     @Length(max = 20)
@@ -22,27 +24,7 @@ public class UserSignUp {
     @Pattern(regexp = "^[a-zA-Z][\\sa-zA-Z]*$")
     private String name;
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
     public void setPassword(String password) {
         this.password = BcryptUtil.bcryptHash(password);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 }

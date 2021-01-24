@@ -1,8 +1,7 @@
 package org.tdakkota.ncproject.misc;
 
-import org.tdakkota.ncproject.entities.APIError;
+import org.tdakkota.ncproject.api.APIError;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;

@@ -19,8 +19,7 @@ class AreaTest {
 
         assertFalse(validator.validate(new Area()).isEmpty());
         Area s = new Area();
-        s.id = 10L;
-        s.name = "abc";
+        s.setName("abc");
         assertTrue(validator.validate(s).isEmpty());
     }
 }

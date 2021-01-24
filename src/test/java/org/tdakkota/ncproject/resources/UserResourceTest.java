@@ -4,8 +4,8 @@ import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.Test;
+import org.tdakkota.ncproject.api.UserSignUp;
 import org.tdakkota.ncproject.entities.User;
-import org.tdakkota.ncproject.entities.UserSignUp;
 
 import javax.inject.Inject;
 import java.util.stream.Stream;
@@ -35,27 +35,28 @@ class UserResourceTest implements ResourceTest<User> {
                 .statusCode(201)
                 .extract()
                 .as(User.class);
-        assertEquals(u.getUsername(), createResponse.username);
-        assertEquals(u.getName(), createResponse.name);
+        assertEquals(u.getUsername(), createResponse.getUsername());
+        assertEquals(u.getName(), createResponse.getName());
 
         signup(u).statusCode(409);
 
-        User getResponse = get(createResponse.id)
+        User getResponse = get(createResponse.getId())
                 .statusCode(200)
                 .extract()
                 .as(User.class);
         assertEquals(createResponse, getResponse);
 
         User update = new User();
-        update.name = "NewAdmin";
-        update.username = "admin";
-        User updateResponse = update(createResponse.id, update)
+        update.setName("NewAdmin");
+        update.setUsername("admin");
+        User updateResponse = update(createResponse.getId(), update)
                 .statusCode(201)
                 .extract()
                 .as(User.class);
+        update.setId(updateResponse.getId());
         assertEquals(update, updateResponse);
 
-        getResponse = get(createResponse.id)
+        getResponse = get(createResponse.getId())
                 .statusCode(200)
                 .extract()
                 .as(User.class);
@@ -65,15 +66,15 @@ class UserResourceTest implements ResourceTest<User> {
         assertEquals(
                 updateResponse,
                 Stream.of(listResponse).
-                        filter(i -> i.id.equals(createResponse.id)).
+                        filter(i -> i.getId().equals(createResponse.getId())).
                         findFirst().orElseThrow()
         );
 
-        delete(createResponse.id).statusCode(204);
-        delete(createResponse.id).statusCode(404);
+        delete(createResponse.getId()).statusCode(204);
+        delete(createResponse.getId()).statusCode(404);
 
-        get(createResponse.id).statusCode(404);
+        get(createResponse.getId()).statusCode(404);
         listResponse = list().statusCode(200).extract().as(User[].class);
-        assertTrue(Stream.of(listResponse).noneMatch(i -> i.id.equals(createResponse.id)));
+        assertTrue(Stream.of(listResponse).noneMatch(i -> i.getId().equals(createResponse.getId())));
     }
 }

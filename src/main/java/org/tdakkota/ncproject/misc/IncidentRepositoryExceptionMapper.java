@@ -1,7 +1,7 @@
 package org.tdakkota.ncproject.misc;
 
-import org.tdakkota.ncproject.entities.APIError;
-import org.tdakkota.ncproject.services.IncidentServiceException;
+import org.tdakkota.ncproject.api.APIError;
+import org.tdakkota.ncproject.repos.IncidentRepositoryException;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -9,7 +9,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public class IncidentServiceExceptionMapper implements ExceptionMapper<IncidentServiceException> {
+public class IncidentRepositoryExceptionMapper implements ExceptionMapper<IncidentRepositoryException> {
     /**
      * Map an exception to a {@link Response}. Returning
      * {@code null} results in a {@link Response.Status#NO_CONTENT}
@@ -20,7 +20,7 @@ public class IncidentServiceExceptionMapper implements ExceptionMapper<IncidentS
      * @return a response mapped from the supplied exception.
      */
     @Override
-    public Response toResponse(IncidentServiceException exception) {
+    public Response toResponse(IncidentRepositoryException exception) {
         return Response.status(Response.Status.BAD_REQUEST).
                 type(MediaType.APPLICATION_JSON_TYPE).
                 entity(new APIError(exception.getMessage())).

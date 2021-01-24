@@ -3,16 +3,15 @@ package org.tdakkota.ncproject.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.quarkus.elytron.security.common.BcryptUtil;
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.quarkus.security.jpa.Password;
 import io.quarkus.security.jpa.Roles;
 import io.quarkus.security.jpa.UserDefinition;
 import io.quarkus.security.jpa.Username;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.validator.constraints.Length;
+import org.tdakkota.ncproject.api.UserSignUp;
+import org.tdakkota.ncproject.constraints.Mergeable;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -22,35 +21,45 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
+@UserDefinition
 @RegisterForReflection
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
+@Data
+@Entity
 @Table(name = "users")
-@UserDefinition
-public class User extends PanacheEntity {
+public class User implements Mergeable<User> {
+    @Id
+    @GeneratedValue
+    private Long id;
+
     @Username
     @NotBlank(message = "Username may not be blank")
     @Length(max = 20)
     @Column(unique = true)
-    public String username;
+    @NonNull
+    private String username;
 
     @NotBlank(message = "Name may not be blank")
     @Pattern(regexp = "^[a-zA-Z][\\sa-zA-Z]*$")
     @Length(max = 50)
-    public String name;
+    @NonNull
+    private String name;
 
     @Roles
-    public String role = "user";
-    public Date createdAt = new Date();
+    private String role = "user";
+
+    private Date createdAt = new Date();
 
     @OneToMany(mappedBy = "assignee")
     @JsonIgnore
-    public Set<Incident> assignedIncidents = Collections.emptySet();
+    private Set<Incident> assignedIncidents = Collections.emptySet();
 
     @Password
     @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @JsonIgnore
+    @NonNull
     private String password;
 
     public User(UserSignUp signUp) {
@@ -59,41 +68,17 @@ public class User extends PanacheEntity {
         this.password = signUp.getPassword();
     }
 
-    public User update(User e) {
+    public void merge(User e) {
         this.username = e.username;
         this.password = e.password;
         this.name = e.name;
         this.role = e.role;
         this.createdAt = e.createdAt;
         this.assignedIncidents = new HashSet<>(e.assignedIncidents);
-        this.persist();
-        return this;
-    }
-
-    @JsonIgnore
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     @JsonProperty("password")
     public void setEncryptedPassword(String password) {
         this.password = BcryptUtil.bcryptHash(password);
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", name='" + name + '\'' +
-                ", role='" + role + '\'' +
-                ", createdAt=" + createdAt +
-                ", assignedIncidents=" + assignedIncidents +
-                ", id=" + id +
-                '}';
     }
 }

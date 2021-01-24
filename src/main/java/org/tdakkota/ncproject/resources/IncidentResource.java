@@ -1,7 +1,7 @@
 package org.tdakkota.ncproject.resources;
 
 import io.quarkus.panache.common.Page;
-import org.tdakkota.ncproject.entities.AddIncidentRequest;
+import org.tdakkota.ncproject.api.AddIncidentRequest;
 import org.tdakkota.ncproject.entities.Incident;
 import org.tdakkota.ncproject.services.IncidentService;
 

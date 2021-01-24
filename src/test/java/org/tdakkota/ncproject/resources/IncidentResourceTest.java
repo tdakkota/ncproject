@@ -7,10 +7,11 @@ import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.tdakkota.ncproject.entities.AddIncidentRequest;
-import org.tdakkota.ncproject.entities.Incident;
-import org.tdakkota.ncproject.entities.IncidentEvent;
-import org.tdakkota.ncproject.misc.Setup;
+import org.tdakkota.ncproject.api.AddIncidentRequest;
+import org.tdakkota.ncproject.entities.*;
+import org.tdakkota.ncproject.repos.AreaRepository;
+import org.tdakkota.ncproject.repos.StatusRepository;
+import org.tdakkota.ncproject.repos.UserRepository;
 import org.tdakkota.ncproject.services.IncidentEventEmitter;
 
 import javax.inject.Inject;
@@ -29,11 +30,16 @@ class IncidentResourceTest implements ResourceTest<Incident> {
     @Inject
     IncidentResource service;
 
+    @Inject
+    AreaRepository areas;
+    @Inject
+    StatusRepository statuses;
+    @Inject
+    UserRepository users;
+
     @InjectMock
     IncidentEventEmitter mockEmitter;
     Map<IncidentEvent.EventType, Incident> events;
-
-    private Setup setup = new Setup();
 
     @BeforeEach
     void setUpMockEmitter() {
@@ -55,11 +61,29 @@ class IncidentResourceTest implements ResourceTest<Incident> {
         }).when(mockEmitter).closed(any(Incident.class));
     }
 
+    private User user;
+    private Area area;
+    private Status status;
+
     @BeforeEach
     @Transactional
     public void setupTestData() {
-        // Create test user, area and status
-        setup.create();
+        User user = new User();
+        user.setUsername("testuser");
+        user.setEncryptedPassword("testuser");
+        user.setName("testuser");
+        users.persist(user);
+        this.user = user;
+
+        Area area = new Area();
+        area.setName("testarea");
+        areas.persist(area);
+        this.area = area;
+
+        Status status = new Status();
+        status.setName("teststatus");
+        statuses.persist(status);
+        this.status = status;
     }
 
     @Test
@@ -68,21 +92,23 @@ class IncidentResourceTest implements ResourceTest<Incident> {
         add(new AddIncidentRequest()).statusCode(400);
 
         AddIncidentRequest badDate = new AddIncidentRequest();
-        badDate.name = "badDate";
+        badDate.setName("badDate");
         Instant now = Instant.now(); //current date
-        badDate.timeline = new Incident.Timeline(now, now.minus(Duration.ofDays(300)));
+        badDate.setTimeline(new Timeline(now, now.minus(Duration.ofDays(300))));
         add(badDate).statusCode(400);
 
 
-        AddIncidentRequest good = new AddIncidentRequest();
-        good.name = "good";
-        good.assignee = setup.getUser().id;
-        good.area = setup.getArea().id;
-        good.status = setup.getStatus().id;
-        good.timeline = new Incident.Timeline(now.minus(Duration.ofDays(300)), now);
+        Timeline timeline = new Timeline(now.minus(Duration.ofDays(300)), now);
+        AddIncidentRequest good = new AddIncidentRequest(
+                "good",
+                this.user,
+                this.area,
+                this.status,
+                timeline
+        );
 
         Incident addResponse = add(good).statusCode(201).extract().as(Incident.class);
-        assertEquals(addResponse, events.get(IncidentEvent.EventType.OPENED));
+        assertEquals(addResponse.getId(), events.get(IncidentEvent.EventType.OPENED).getId());
     }
 
     ValidatableResponse add(AddIncidentRequest body) {
