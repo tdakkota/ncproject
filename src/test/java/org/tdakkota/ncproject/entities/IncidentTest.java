@@ -23,6 +23,8 @@ class IncidentTest {
         Incident s = new Incident();
         s.id = 10L;
         s.name = "abc";
+        s.assignee = new User();
+        s.area = new Area();
         assertFalse(validator.validate(s).isEmpty());
 
         Instant now = Instant.now();
