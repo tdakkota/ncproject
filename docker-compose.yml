@@ -20,4 +20,4 @@ services:
   ncapp:
     build:
       context: ./
-      dockerfile: ./src/main/docker
+      dockerfile: ./src/main/docker/Dockerfile.jvm

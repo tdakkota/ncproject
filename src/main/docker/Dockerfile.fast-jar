@@ -21,6 +21,12 @@
 # docker run -i --rm -p 8080:8080 -p 5005:5005 -e JAVA_ENABLE_DEBUG="true" quarkus/app-fast-jar
 #
 ###
+FROM maven:3.6.0-jdk-11-slim AS build
+
+COPY pom.xml ./pom.xml
+COPY src ./src
+RUN mvn package -Dquarkus.package.type=fast-jar
+
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.3 
 
 ARG JAVA_PACKAGE=java-11-openjdk-headless
