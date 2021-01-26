@@ -121,6 +121,10 @@
             <artifactId>hibernate-types-52</artifactId>
             <version>2.10.2</version>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-flyway</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
