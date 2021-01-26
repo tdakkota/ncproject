@@ -24,15 +24,17 @@ public class Area implements Mergeable<Area> {
     @GeneratedValue
     private Long id;
 
-    @NotBlank(message = "Name may not be blank")
-    @Length(max = 50)
+    @NotBlank(message = Entities.BLANK_NAME_MESSAGE)
+    @Length(max = Entities.NAME_LENGTH_LIMIT)
     private String name = "";
 
-    @Length(max = 1000)
+    @Length(max = Entities.DESCRIPTION_LENGTH_LIMIT)
     private String description = "";
 
     public void merge(Area area) {
-        this.name = area.name;
-        this.description = area.description;
+        if (area != null) {
+            this.name = area.getName();
+            this.description = area.getDescription();
+        }
     }
 }

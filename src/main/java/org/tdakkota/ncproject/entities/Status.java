@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
-import org.tdakkota.ncproject.constraints.NotRecursive;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;

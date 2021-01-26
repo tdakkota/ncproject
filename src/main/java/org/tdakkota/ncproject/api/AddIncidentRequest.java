@@ -5,7 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import org.tdakkota.ncproject.constraints.TimelineValid;
-import org.tdakkota.ncproject.entities.*;
+import org.tdakkota.ncproject.entities.Entities;
+import org.tdakkota.ncproject.entities.Incident;
+import org.tdakkota.ncproject.entities.Timeline;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -16,35 +18,35 @@ import javax.validation.constraints.NotNull;
 public class AddIncidentRequest {
     private String icon;
 
-    @Length(max = 50)
-    @NotBlank(message = "Name may not be blank")
+    @Length(max = Entities.NAME_LENGTH_LIMIT)
+    @NotBlank(message = Entities.BLANK_NAME_MESSAGE)
     private String name;
 
     @NotNull
-    private Long assignee;
+    private Long assigneeId;
 
     @NotNull
-    private Long area;
+    private Long areaId;
 
     @TimelineValid
     @NotNull
     private Timeline timeline;
 
-    @Length(max = 100)
+    @Length(max = Entities.INCIDENT_DESCRIPTION_LENGTH_LIMIT)
     private String description;
 
     private Incident.Priority priority = Incident.Priority.NORMAL;
 
     @NotNull
-    private Long status;
+    private Long statusId;
 
     private boolean closed;
 
-    public AddIncidentRequest(String name, User assignee, Area area, Status status, Timeline timeline) {
+    public AddIncidentRequest(String name, Long assignee, Long area, Long status, Timeline timeline) {
         this.name = name;
-        this.assignee = assignee.getId();
-        this.area = area.getId();
-        this.status = status.getId();
+        this.assigneeId = assignee;
+        this.areaId = area;
+        this.statusId = status;
         this.timeline = timeline;
     }
 }

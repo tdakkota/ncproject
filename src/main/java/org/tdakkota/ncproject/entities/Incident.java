@@ -25,8 +25,8 @@ public class Incident {
 
     private String icon;
 
-    @Length(max = 50)
-    @NotBlank(message = "Name may not be blank")
+    @Length(max = Entities.NAME_LENGTH_LIMIT)
+    @NotBlank(message = Entities.BLANK_NAME_MESSAGE)
     @NonNull
     private String name;
 
@@ -44,7 +44,7 @@ public class Incident {
     @NonNull
     private Timeline timeline;
 
-    @Length(max = 100)
+    @Length(max = Entities.INCIDENT_DESCRIPTION_LENGTH_LIMIT)
     private String description = "";
 
     @Enumerated(EnumType.STRING)

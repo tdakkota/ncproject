@@ -1,5 +1,6 @@
 package org.tdakkota.ncproject.constraints;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.tdakkota.ncproject.entities.Status;
 import org.tdakkota.ncproject.entities.StatusBody;
 
@@ -28,7 +29,7 @@ public class NotRecursiveConstraintValidator implements ConstraintValidator<NotR
 
         StatusBody body = value.getBody();
         List<Long> successors = body.getSuccessors();
-        if (successors == null || successors.isEmpty()) {
+        if (CollectionUtils.isEmpty(successors)) {
             return true;
         }
 

@@ -1,10 +1,11 @@
 package org.tdakkota.ncproject.constraints;
 
-import org.tdakkota.ncproject.entities.Incident;
 import org.tdakkota.ncproject.entities.Timeline;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import java.util.Objects;
+import java.util.Optional;
 
 public class TimelineValidConstraintValidator implements ConstraintValidator<TimelineValid, Timeline> {
     /**
@@ -20,9 +21,10 @@ public class TimelineValidConstraintValidator implements ConstraintValidator<Tim
      */
     @Override
     public boolean isValid(Timeline value, ConstraintValidatorContext context) {
-        return value != null &&
-                value.getStart() != null &&
-                value.getDue() != null &&
-                value.getStart().before(value.getDue());
+        return Optional.ofNullable(value)
+                .filter(v -> Objects.nonNull(v.getStart()))
+                .filter(v -> Objects.nonNull(v.getDue()))
+                .map(v -> value.getStart().before(value.getDue()))
+                .orElse(false);
     }
 }

@@ -29,7 +29,11 @@ public class Timeline {
     }
 
     public Timeline(Instant start, Instant due) {
-        this.start = Date.from(start);
-        this.due = Date.from(due);
+        if (start != null) {
+            this.start = Date.from(start);
+        }
+        if (due != null) {
+            this.due = Date.from(due);
+        }
     }
 }
