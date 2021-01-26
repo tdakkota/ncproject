@@ -1,7 +1,8 @@
 package org.tdakkota.ncproject.resources;
 
-import io.quarkus.panache.common.Page;
+import org.jboss.resteasy.spi.NoLogWebApplicationException;
 import org.tdakkota.ncproject.api.AddIncidentRequest;
+import org.tdakkota.ncproject.api.IncidentFilter;
 import org.tdakkota.ncproject.entities.Incident;
 import org.tdakkota.ncproject.services.IncidentService;
 
@@ -20,37 +21,26 @@ public class IncidentResource {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Incident get(@PathParam("id") Long id) {
-        return service.get(id);
+        return service.get(id).orElseThrow(() -> new NoLogWebApplicationException(Response.Status.NOT_FOUND));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<Incident> list(@QueryParam("page") @DefaultValue("0") int pageIndex,
                                @QueryParam("size") @DefaultValue("20") int pageSize) {
-        Page page = Page.of(pageIndex, pageSize);
-        return service.list(page);
+        return service.list(pageIndex, pageSize);
     }
 
     @GET
-    @Path("/area/{id}")
+    @Path("/find")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Incident> getByArea(
+    public List<Incident> find(
             @PathParam("id") Long id,
             @QueryParam("page") @DefaultValue("0") int pageIndex,
-            @QueryParam("size") @DefaultValue("20") int pageSize
+            @QueryParam("size") @DefaultValue("20") int pageSize,
+            @BeanParam IncidentFilter filter
     ) {
-        return service.getIncidentsByArea(id, Page.of(pageIndex, pageSize));
-    }
-
-    @GET
-    @Path("/user/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<Incident> getByUser(
-            @PathParam("id") Long id,
-            @QueryParam("page") @DefaultValue("0") int pageIndex,
-            @QueryParam("size") @DefaultValue("20") int pageSize
-    ) {
-        return service.getIncidentsByUser(id, Page.of(pageIndex, pageSize));
+        return service.find(pageIndex, pageSize, filter);
     }
 
     @POST
@@ -66,15 +56,15 @@ public class IncidentResource {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response update(@PathParam("id") Long id, AddIncidentRequest incidentToSave) {
-        return Response.status(Response.Status.CREATED).
-                entity(service.update(id, incidentToSave)).
-                build();
+    public Response update(@PathParam("id") Long id, AddIncidentRequest e) {
+        return service.update(id, e).map(Response::ok).orElse(Response.status(Response.Status.NOT_FOUND)).build();
     }
 
     @DELETE
     @Path("{id}")
     public void close(@PathParam("id") Long id) {
-        service.close(id);
+        if (!service.close(id)) {
+            throw new NoLogWebApplicationException(Response.Status.NOT_FOUND);
+        }
     }
 }

@@ -50,7 +50,7 @@ class UserResourceTest implements ResourceTest<User> {
         update.setName("NewAdmin");
         update.setUsername("admin");
         User updateResponse = update(createResponse.getId(), update)
-                .statusCode(201)
+                .statusCode(200)
                 .extract()
                 .as(User.class);
         update.setId(updateResponse.getId());

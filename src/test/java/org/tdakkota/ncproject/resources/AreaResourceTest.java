@@ -44,7 +44,7 @@ class AreaResourceTest implements ResourceTest<Area> {
         Area update = new Area();
         update.setName("updateGood");
         Area updateResponse = update(createResponse.getId(), update)
-                .statusCode(201)
+                .statusCode(200)
                 .extract()
                 .as(Area.class);
         update.setId(updateResponse.getId());

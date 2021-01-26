@@ -44,7 +44,7 @@ class StatusResourceTest implements ResourceTest<StatusBody> {
         StatusBody update = new StatusBody();
         update.setName("updateGood");
         Status updateResponse = update(createResponse.getId(), update)
-                .statusCode(201)
+                .statusCode(200)
                 .extract()
                 .as(Status.class);
         assertEquals(update, updateResponse.getBody());

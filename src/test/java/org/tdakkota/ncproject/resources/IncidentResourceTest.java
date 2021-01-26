@@ -3,6 +3,7 @@ package org.tdakkota.ncproject.resources;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
+import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,8 +20,11 @@ import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Stream;
 
+import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
 @QuarkusTest
@@ -106,14 +110,48 @@ class IncidentResourceTest implements ResourceTest<Incident> {
         Timeline timeline = new Timeline(now.minus(Duration.ofDays(300)), now);
         AddIncidentRequest good = new AddIncidentRequest(
                 "good",
-                this.user,
-                this.area,
-                this.status.get(0),
+                this.user.getId(),
+                this.area.getId(),
+                this.status.get(0).getId(),
                 timeline
         );
 
         Incident addResponse = add(good).statusCode(201).extract().as(Incident.class);
         assertEquals(addResponse.getId(), events.get(IncidentEvent.EventType.OPENED).getId());
+
+        Incident[] find = given()
+                .queryParam("assigneeID", this.user.getId())
+                .get("/find")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract().as(Incident[].class);
+        assertEquals(
+                Stream.of(find).filter(e -> e.getId().equals(addResponse.getId())).findFirst().orElseThrow(),
+                addResponse
+        );
+
+        find = given()
+                .queryParam("areaID", this.area.getId())
+                .get("/find")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract().as(Incident[].class);
+        assertEquals(
+                Stream.of(find).filter(e -> e.getId().equals(addResponse.getId())).findFirst().orElseThrow(),
+                addResponse
+        );
+
+        find = given()
+                .queryParam("areaID", -1)
+                .get("/find")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract().as(Incident[].class);
+
+        assertTrue(Stream.of(find).noneMatch(e -> e.getId().equals(addResponse.getId())));
     }
 
     ValidatableResponse add(AddIncidentRequest body) {

@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import org.hibernate.validator.constraints.Length;
 import org.tdakkota.ncproject.constraints.TimelineValid;
 
@@ -18,6 +21,14 @@ import javax.validation.constraints.NotNull;
 @Data
 @Entity
 @Table(name = "incidents")
+@FilterDef(name = "byAssigneeID", parameters = @ParamDef(name = "assigneeID", type = "long"))
+@Filter(name = "byAssigneeID", condition = "assignee_id = :assigneeID")
+@FilterDef(name = "byAreaID", parameters = @ParamDef(name = "areaID", type = "long"))
+@Filter(name = "byAreaID", condition = "area_id = :areaID")
+@FilterDef(name = "byStart", parameters = @ParamDef(name = "start", type = "date"))
+@Filter(name = "byStart", condition = "start >= :start")
+@FilterDef(name = "byDue", parameters = @ParamDef(name = "due", type = "date"))
+@Filter(name = "byDue", condition = "due <= :due")
 public class Incident {
     @Id
     @GeneratedValue

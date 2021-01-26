@@ -7,6 +7,7 @@ import org.tdakkota.ncproject.entities.StatusBody;
 import javax.enterprise.context.ApplicationScoped;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Optional;
 
 @ApplicationScoped
 public class StatusRepository implements PanacheRepository<Status> {
@@ -17,15 +18,12 @@ public class StatusRepository implements PanacheRepository<Status> {
         return s;
     }
 
-    public Status update(Long id, StatusBody e) {
-        Status exist = findById(id);
-        if (exist == null) {
-            exist = new Status();
-        }
-
-        exist.setModificationDate(Date.from(Instant.now()));
-        exist.setBody(e);
-        this.persist(exist);
-        return exist;
+    public Optional<Status> update(Long id, StatusBody e) {
+        return findByIdOptional(id).map(exist -> {
+            exist.setModificationDate(Date.from(Instant.now()));
+            exist.setBody(e);
+            this.persist(exist);
+            return exist;
+        });
     }
 }
