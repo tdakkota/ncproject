@@ -9,6 +9,7 @@ import io.quarkus.security.jpa.Roles;
 import io.quarkus.security.jpa.UserDefinition;
 import io.quarkus.security.jpa.Username;
 import lombok.*;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.validator.constraints.Length;
 import org.tdakkota.ncproject.api.UserSignUp;
 import org.tdakkota.ncproject.constraints.Mergeable;
@@ -34,20 +35,20 @@ public class User implements Mergeable<User> {
     private Long id;
 
     @Username
-    @NotBlank(message = "Username may not be blank")
-    @Length(max = 20)
+    @NotBlank(message = Entities.BLANK_USERNAME_MESSAGE)
+    @Length(max = Entities.USER_USERNAME_LENGTH_LIMIT)
     @Column(unique = true)
     @NonNull
     private String username;
 
-    @NotBlank(message = "Name may not be blank")
-    @Pattern(regexp = "^[a-zA-Z][\\sa-zA-Z]*$")
-    @Length(max = 50)
+    @NotBlank(message = Entities.BLANK_NAME_MESSAGE)
+    @Pattern(regexp = Entities.USER_NAME_REGEXP)
+    @Length(max = Entities.NAME_LENGTH_LIMIT)
     @NonNull
     private String name;
 
     @Roles
-    private String role = "user";
+    private String role = Entities.USER_DEFAULT_ROLE;
 
     private Date createdAt = new Date();
 
@@ -74,7 +75,10 @@ public class User implements Mergeable<User> {
         this.name = e.name;
         this.role = e.role;
         this.createdAt = e.createdAt;
-        this.assignedIncidents = new HashSet<>(e.assignedIncidents);
+        this.assignedIncidents = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(e.assignedIncidents)) {
+            this.assignedIncidents.addAll(e.assignedIncidents);
+        }
     }
 
     @JsonProperty("password")

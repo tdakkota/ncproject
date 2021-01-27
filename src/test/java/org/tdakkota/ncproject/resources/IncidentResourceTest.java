@@ -2,26 +2,28 @@ package org.tdakkota.ncproject.resources;
 
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.mockito.InjectMock;
+import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.tdakkota.ncproject.api.AddIncidentRequest;
 import org.tdakkota.ncproject.entities.*;
 import org.tdakkota.ncproject.repos.AreaRepository;
 import org.tdakkota.ncproject.repos.StatusRepository;
 import org.tdakkota.ncproject.repos.UserRepository;
-import org.tdakkota.ncproject.services.IncidentEventEmitter;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
+import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 @TestHTTPEndpoint(IncidentResource.class)
@@ -35,30 +37,6 @@ class IncidentResourceTest implements ResourceTest<Incident> {
     StatusRepository statuses;
     @Inject
     UserRepository users;
-
-    @InjectMock
-    IncidentEventEmitter mockEmitter;
-    Map<IncidentEvent.EventType, Incident> events;
-
-    @BeforeEach
-    void setUpMockEmitter() {
-        this.events = new HashMap<>();
-
-        Mockito.doAnswer(invocation -> {
-            events.put(IncidentEvent.EventType.OPENED, invocation.getArgument(0));
-            return null;
-        }).when(mockEmitter).opened(any(Incident.class));
-
-        Mockito.doAnswer(invocation -> {
-            events.put(IncidentEvent.EventType.UPDATED, invocation.getArgument(0));
-            return null;
-        }).when(mockEmitter).updated(any(Incident.class));
-
-        Mockito.doAnswer(invocation -> {
-            events.put(IncidentEvent.EventType.CLOSED, invocation.getArgument(0));
-            return null;
-        }).when(mockEmitter).closed(any(Incident.class));
-    }
 
     private User user;
     private Area area;
@@ -106,14 +84,47 @@ class IncidentResourceTest implements ResourceTest<Incident> {
         Timeline timeline = new Timeline(now.minus(Duration.ofDays(300)), now);
         AddIncidentRequest good = new AddIncidentRequest(
                 "good",
-                this.user,
-                this.area,
-                this.status.get(0),
+                this.user.getId(),
+                this.area.getId(),
+                this.status.get(0).getId(),
                 timeline
         );
 
         Incident addResponse = add(good).statusCode(201).extract().as(Incident.class);
-        assertEquals(addResponse.getId(), events.get(IncidentEvent.EventType.OPENED).getId());
+
+        Incident[] find = given()
+                .queryParam("assigneeID", this.user.getId())
+                .get("/find")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract().as(Incident[].class);
+        assertEquals(
+                Stream.of(find).filter(e -> e.getId().equals(addResponse.getId())).findFirst().orElseThrow(),
+                addResponse
+        );
+
+        find = given()
+                .queryParam("areaID", this.area.getId())
+                .get("/find")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract().as(Incident[].class);
+        assertEquals(
+                Stream.of(find).filter(e -> e.getId().equals(addResponse.getId())).findFirst().orElseThrow(),
+                addResponse
+        );
+
+        find = given()
+                .queryParam("areaID", -1)
+                .get("/find")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract().as(Incident[].class);
+
+        assertTrue(Stream.of(find).noneMatch(e -> e.getId().equals(addResponse.getId())));
     }
 
     ValidatableResponse add(AddIncidentRequest body) {

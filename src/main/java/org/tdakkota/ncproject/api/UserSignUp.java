@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
+import org.tdakkota.ncproject.entities.Entities;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -13,15 +14,15 @@ import javax.validation.constraints.Pattern;
 @AllArgsConstructor
 @Data
 public class UserSignUp {
-    @NotBlank(message = "Username may not be blank")
-    @Length(max = 20)
+    @NotBlank(message = Entities.BLANK_USERNAME_MESSAGE)
+    @Length(max = Entities.USER_USERNAME_LENGTH_LIMIT)
     private String username;
 
-    @NotBlank(message = "Password may not be blank")
+    @NotBlank(message = Entities.BLANK_PASSWORD_MESSAGE)
     private String password;
 
-    @NotBlank(message = "Name may not be blank")
-    @Pattern(regexp = "^[a-zA-Z][\\sa-zA-Z]*$")
+    @NotBlank(message = Entities.BLANK_NAME_MESSAGE)
+    @Pattern(regexp = Entities.USER_NAME_REGEXP)
     private String name;
 
     public void setPassword(String password) {

@@ -1,21 +1,25 @@
 package org.tdakkota.ncproject.services;
 
+import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Page;
-import io.quarkus.panache.common.Sort;
+import io.quarkus.panache.common.Parameters;
 import org.jboss.logging.Logger;
-import org.jboss.resteasy.spi.NoLogWebApplicationException;
-import org.tdakkota.ncproject.api.APIError;
 import org.tdakkota.ncproject.api.AddIncidentRequest;
-import org.tdakkota.ncproject.entities.Incident;
-import org.tdakkota.ncproject.entities.StatusBody;
+import org.tdakkota.ncproject.api.IncidentFilter;
+import org.tdakkota.ncproject.entities.*;
+import org.tdakkota.ncproject.misc.AddIncidentRequestMapper;
+import org.tdakkota.ncproject.repos.AreaRepository;
 import org.tdakkota.ncproject.repos.IncidentRepository;
+import org.tdakkota.ncproject.repos.StatusRepository;
+import org.tdakkota.ncproject.repos.UserRepository;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @ApplicationScoped
 public class IncidentService {
@@ -23,82 +27,97 @@ public class IncidentService {
     IncidentRepository repo;
 
     @Inject
+    AreaRepository areas;
+
+    @Inject
+    StatusRepository statuses;
+
+    @Inject
+    UserRepository users;
+
+    @Inject
+    AddIncidentRequestMapper addMapper;
+
+    @Inject
     IncidentEventEmitter emitter;
 
     @Inject
     Logger log;
 
-    public Incident get(Long id) {
-        Incident incident = repo.findById(id);
-        if (incident == null) {
-            throw new NoLogWebApplicationException(404);
+    public Optional<Incident> get(Long id) {
+        return repo.findByIdOptional(id);
+    }
+
+    public List<Incident> list(int pageIndex, int pageSize) {
+        return repo.findAll().page(Page.of(pageIndex, pageSize)).list();
+    }
+
+    public List<Incident> find(int pageIndex, int pageSize, IncidentFilter filter) {
+        PanacheQuery<Incident> q = repo.findAll();
+        for (Map.Entry<String, Parameters> e : filter.filters().entrySet()) {
+            q = q.filter(e.getKey(), e.getValue());
         }
-        return incident;
+        return q.page(Page.of(pageIndex, pageSize)).list();
     }
 
-    public List<Incident> list(Page page) {
-        return repo.findAll().page(page).list();
-    }
+    private void saveIncident(AddIncidentRequest req, Incident i) {
+        addMapper.toIncident(req, i);
 
-    public List<Incident> getIncidentsByUser(Long id, Page page) {
-        return repo.getIncidentsByUser(id, page);
-    }
+        User user = users.findByIdOptional(req.getAssigneeId()).orElseThrow(
+                () -> new IncidentCreationException("area not found")
+        );
+        i.setAssignee(user);
 
-    public List<Incident> getIncidentsByUser(Long id, Page page, Sort sort) {
-        return repo.getIncidentsByUser(id, page, sort);
-    }
+        Area area = areas.findByIdOptional(req.getAreaId()).orElseThrow(
+                () -> new IncidentCreationException("area not found")
+        );
+        i.setArea(area);
 
-    public List<Incident> getIncidentsByArea(Long id, Page page) {
-        return repo.getIncidentsByArea(id, page);
-    }
+        Status status = statuses.findByIdOptional(req.getStatusId()).orElseThrow(
+                () -> new IncidentCreationException("status not found")
+        );
+        i.setStatus(status);
 
-    public List<Incident> getIncidentsByArea(Long id, Page page, Sort sort) {
-        return repo.getIncidentsByArea(id, page, sort);
+        repo.persist(i);
     }
 
     @Transactional
     public Incident add(@Valid AddIncidentRequest req) {
-        Incident incident = repo.add(req);
-        this.log.debug("Incident created:" + incident.toString());
-        this.emitter.opened(incident);
+        Incident incident = new Incident();
+        saveIncident(req, incident);
+
+        log.debug("Incident created:" + incident.toString());
+        emitter.opened(incident);
         return incident;
     }
 
     @Transactional
-    public Incident update(Long id, @Valid AddIncidentRequest req) {
-        Incident exist = repo.findById(id);
-        if (exist == null) {
-            exist = repo.add(req);
-            this.log.debug("Incident created:" + exist.toString());
-            this.emitter.opened(exist);
+    public Optional<Incident> update(Long id, @Valid AddIncidentRequest req) {
+        return repo.findByIdOptional(id).map(exist -> {
+            StatusBody from = exist.getStatus().getBody();
+            if (!from.getSuccessors().contains(req.getStatusId())) {
+                throw new IncidentCreationException("invalid new status");
+            }
+
+            saveIncident(req, exist);
+
+            log.debug("Incident updated:" + exist.toString());
+            emitter.updated(exist);
             return exist;
-        }
-
-        StatusBody from = exist.getStatus().getBody();
-        if (!from.getSuccessors().contains(req.getStatus())) {
-            throw new NoLogWebApplicationException(
-                    Response.status(Response.Status.BAD_REQUEST)
-                            .entity(new APIError("invalid new status"))
-                            .build()
-            );
-        }
-
-        Incident result = repo.update(exist, req);
-        this.log.debug("Incident updated:" + result.toString());
-        this.emitter.updated(result);
-        return result;
+        });
     }
 
     @Transactional
-    public void close(Long id) {
-        Incident incident = repo.findById(id);
-        if (incident == null) {
-            throw new NoLogWebApplicationException(404);
-        }
-        incident.setClosed(true);
-        repo.persist(incident);
+    public boolean close(Long id) {
+        return repo.findByIdOptional(id).
+                map(incident -> {
+                    incident.setClosed(true);
+                    repo.persist(incident);
 
-        this.log.debug("Incident closed:" + incident.toString());
-        this.emitter.closed(incident);
+                    log.debug("Incident closed:" + incident.toString());
+                    emitter.closed(incident);
+
+                    return true;
+                }).orElse(false);
     }
 }

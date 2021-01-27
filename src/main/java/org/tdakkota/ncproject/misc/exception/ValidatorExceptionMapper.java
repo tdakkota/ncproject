@@ -1,16 +1,16 @@
-package org.tdakkota.ncproject.misc;
+package org.tdakkota.ncproject.misc.exception;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import org.tdakkota.ncproject.api.APIError;
 
+import javax.validation.ConstraintViolationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-
+import java.util.stream.Collectors;
 
 @Provider
-public class JacksonMappingExceptionMapper implements ExceptionMapper<JsonMappingException> {
+public class ValidatorExceptionMapper implements ExceptionMapper<ConstraintViolationException> {
     /**
      * Map an exception to a {@link Response}. Returning
      * {@code null} results in a {@link Response.Status#NO_CONTENT}
@@ -21,10 +21,14 @@ public class JacksonMappingExceptionMapper implements ExceptionMapper<JsonMappin
      * @return a response mapped from the supplied exception.
      */
     @Override
-    public Response toResponse(JsonMappingException exception) {
+    public Response toResponse(ConstraintViolationException exception) {
+        String message = exception.getConstraintViolations().stream().
+                map(c -> c.getPropertyPath().toString() + ": " + c.getMessage()).
+                collect(Collectors.joining(", "));
+
         return Response.status(Response.Status.BAD_REQUEST).
                 type(MediaType.APPLICATION_JSON_TYPE).
-                entity(new APIError(exception.getMessage())).
+                entity(new APIError(message)).
                 build();
     }
 }
