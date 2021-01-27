@@ -1,4 +1,4 @@
-package org.tdakkota.ncproject.mappers;
+package org.tdakkota.ncproject.misc;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;

@@ -1,15 +1,16 @@
-package org.tdakkota.ncproject.misc;
+package org.tdakkota.ncproject.misc.exception;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import org.tdakkota.ncproject.api.APIError;
-import org.tdakkota.ncproject.services.IncidentCreationException;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+
 @Provider
-public class IncidentCreationExceptionMapper implements ExceptionMapper<IncidentCreationException> {
+public class JacksonMappingExceptionMapper implements ExceptionMapper<JsonMappingException> {
     /**
      * Map an exception to a {@link Response}. Returning
      * {@code null} results in a {@link Response.Status#NO_CONTENT}
@@ -20,7 +21,7 @@ public class IncidentCreationExceptionMapper implements ExceptionMapper<Incident
      * @return a response mapped from the supplied exception.
      */
     @Override
-    public Response toResponse(IncidentCreationException exception) {
+    public Response toResponse(JsonMappingException exception) {
         return Response.status(Response.Status.BAD_REQUEST).
                 type(MediaType.APPLICATION_JSON_TYPE).
                 entity(new APIError(exception.getMessage())).

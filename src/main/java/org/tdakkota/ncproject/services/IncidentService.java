@@ -7,7 +7,7 @@ import org.jboss.logging.Logger;
 import org.tdakkota.ncproject.api.AddIncidentRequest;
 import org.tdakkota.ncproject.api.IncidentFilter;
 import org.tdakkota.ncproject.entities.*;
-import org.tdakkota.ncproject.mappers.AddIncidentRequestMapper;
+import org.tdakkota.ncproject.misc.AddIncidentRequestMapper;
 import org.tdakkota.ncproject.repos.AreaRepository;
 import org.tdakkota.ncproject.repos.IncidentRepository;
 import org.tdakkota.ncproject.repos.StatusRepository;
