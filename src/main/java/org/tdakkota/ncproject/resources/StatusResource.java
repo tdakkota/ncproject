@@ -1,6 +1,5 @@
 package org.tdakkota.ncproject.resources;
 
-import org.jboss.resteasy.spi.NoLogWebApplicationException;
 import org.tdakkota.ncproject.entities.Status;
 import org.tdakkota.ncproject.entities.StatusBody;
 import org.tdakkota.ncproject.services.StatusService;
@@ -21,7 +20,7 @@ public class StatusResource {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Status get(@PathParam("id") Long id) {
-        return service.get(id).orElseThrow(() -> new NoLogWebApplicationException(Response.Status.NOT_FOUND));
+        return service.get(id).orElseThrow(NotFoundException::new);
     }
 
     @GET
@@ -43,14 +42,14 @@ public class StatusResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response update(@PathParam("id") Long id, @Valid StatusBody e) {
-        return service.update(id, e).map(Response::ok).orElse(Response.status(Response.Status.NOT_FOUND)).build();
+        return service.update(id, e).map(Response::ok).orElseThrow(NotFoundException::new).build();
     }
 
     @DELETE
     @Path("{id}")
     public void delete(@PathParam("id") Long id) {
         if (!service.delete(id)) {
-            throw new NoLogWebApplicationException(Response.Status.NOT_FOUND);
+            throw new NotFoundException();
         }
     }
 }

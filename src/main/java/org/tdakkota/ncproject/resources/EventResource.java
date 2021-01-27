@@ -15,10 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @ApplicationScoped
 @ServerEndpoint(value = "/ws", encoders = {IncidentEventEncoder.class}, decoders = {IncidentEventEncoder.class})
 public class EventResource {
-    private Map<String, Session> sessions = new ConcurrentHashMap<>();
-
     @Inject
     Logger log;
+    private Map<String, Session> sessions = new ConcurrentHashMap<>();
 
     @OnOpen
     public void onOpen(Session session) {

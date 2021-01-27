@@ -1,6 +1,5 @@
 package org.tdakkota.ncproject.resources;
 
-import org.jboss.resteasy.spi.NoLogWebApplicationException;
 import org.tdakkota.ncproject.api.AddIncidentRequest;
 import org.tdakkota.ncproject.api.IncidentFilter;
 import org.tdakkota.ncproject.entities.Incident;
@@ -21,7 +20,7 @@ public class IncidentResource {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Incident get(@PathParam("id") Long id) {
-        return service.get(id).orElseThrow(() -> new NoLogWebApplicationException(Response.Status.NOT_FOUND));
+        return service.get(id).orElseThrow(NotFoundException::new);
     }
 
     @GET
@@ -57,14 +56,14 @@ public class IncidentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response update(@PathParam("id") Long id, AddIncidentRequest e) {
-        return service.update(id, e).map(Response::ok).orElse(Response.status(Response.Status.NOT_FOUND)).build();
+        return service.update(id, e).map(Response::ok).orElseThrow(NotFoundException::new).build();
     }
 
     @DELETE
     @Path("{id}")
     public void close(@PathParam("id") Long id) {
         if (!service.close(id)) {
-            throw new NoLogWebApplicationException(Response.Status.NOT_FOUND);
+            throw new NotFoundException();
         }
     }
 }
