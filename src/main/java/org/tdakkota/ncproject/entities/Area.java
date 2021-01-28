@@ -18,7 +18,7 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @Data
 @Entity
-@Table(name = "tables")
+@Table(name = "areas")
 public class Area implements Mergeable<Area> {
     @Id
     @GeneratedValue

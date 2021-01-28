@@ -8,3 +8,15 @@ quarkus:
   hibernate-orm:
     database:
       generation: update
+
+"%dev":
+  quarkus:
+    datasource:
+      db-kind: postgresql
+      username: ncapp
+      password: ncapp
+      jdbc:
+        url: jdbc:postgresql://localhost:5432/test_db
+    hibernate-orm:
+      database:
+        generation: drop-and-create

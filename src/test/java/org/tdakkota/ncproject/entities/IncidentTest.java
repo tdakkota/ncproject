@@ -24,6 +24,9 @@ class IncidentTest {
         s.setName("abc");
         s.setAssignee(new User());
         s.setArea(new Area());
+        Status status = new Status();
+        status.setBody(new StatusBody());
+        s.setStatus(status);
         assertFalse(validator.validate(s).isEmpty());
 
         Instant now = Instant.now();

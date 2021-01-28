@@ -53,6 +53,7 @@ public class User implements Mergeable<User> {
     private Date createdAt = new Date();
 
     @OneToMany(mappedBy = "assignee")
+    @ToString.Exclude
     @JsonIgnore
     private Set<Incident> assignedIncidents = Collections.emptySet();
 
