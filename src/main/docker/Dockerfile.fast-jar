@@ -23,9 +23,9 @@
 ###
 FROM maven:3.6.0-jdk-11-slim AS build
 
-COPY pom.xml ./pom.xml
-COPY src ./src
-RUN mvn package -Dquarkus.package.type=fast-jar
+COPY ./pom.xml ./pom.xml
+COPY ./src ./src
+RUN mvn package -Dquarkus.package.type=fast-jar -DskipTests
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.3 
 
