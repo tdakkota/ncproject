@@ -31,7 +31,7 @@ import java.util.Set;
 @Table(name = "users")
 public class User implements Mergeable<User> {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Username

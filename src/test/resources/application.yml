@@ -5,6 +5,6 @@ quarkus:
     password: ncapp
     jdbc:
       url: jdbc:postgresql://localhost:5432/test_db
-  hibernate-orm:
-    database:
-      generation: drop-and-create
+  flyway:
+    migrate-at-start: true
+    clean-at-start: true
