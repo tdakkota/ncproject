@@ -7,10 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import org.tdakkota.ncproject.constraints.Mergeable;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 
 @RegisterForReflection
@@ -21,7 +18,7 @@ import javax.validation.constraints.NotBlank;
 @Table(name = "areas")
 public class Area implements Mergeable<Area> {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank(message = Entities.BLANK_NAME_MESSAGE)

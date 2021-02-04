@@ -31,7 +31,7 @@ import javax.validation.constraints.NotNull;
 @Filter(name = "byDue", condition = "due <= :due")
 public class Incident {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String icon;

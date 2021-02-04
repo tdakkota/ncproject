@@ -24,7 +24,7 @@ import java.util.Date;
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 public class Status {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
